@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>com.github.samfic.szyszka</id>
-  <name>Szyszka</name>
+  <name>NeoSzyszka</name>
   <summary>Simple but powerful file renamer, written in Rust</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <description>
     <p>
-      Szyszka is a simple, fast and powerful file renamer written in Rust.
+      NeoSzyszka is a simple, fast and powerful file renamer written in Rust.
     </p>
     <p>
-      This is a fork of the original Szyszka by Rafał Mikrut, rewritten with GTK 4 and libadwaita (GNOME HIG compliant).
+      This is a fork of the original Szyszka by Rafał Mikrut, rewritten with GTK 4 and libadwaita (GNOME HIG compliant) and maintained as NeoSzyszka by Sam-Fic.
     </p>
   </description>
   <launchable type="desktop-id">com.github.samfic.szyszka.desktop</launchable>
@@ -37,8 +37,8 @@
   </releases>
   <content_rating type="oars-1.0"/>
   <developer_name>Rafał Mikrut, Sam-Fic</developer_name>
-  <url type="homepage">https://github.com/Sam-Fic/szyszka</url>
-  <url type="bugtracker">https://github.com/Sam-Fic/szyszka/issues</url>
-  <url type="vcs-browser">https://github.com/Sam-Fic/szyszka</url>
+  <url type="homepage">https://github.com/Sam-Fic/NeoSzyszka</url>
+  <url type="bugtracker">https://github.com/Sam-Fic/NeoSzyszka/issues</url>
+  <url type="vcs-browser">https://github.com/Sam-Fic/NeoSzyszka</url>
   <url type="donation">https://github.com/sponsors/Sam-Fic</url>
 </component>

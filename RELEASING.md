@@ -1,4 +1,4 @@
-# Szyszka 发布指南（Release Guide）
+# NeoSzyszka 发布指南（Release Guide）
 
 > 涵盖版本发布流程（AI 走前几步 + `release.yml` CI 自动构建三平台并发布）以及 Flatpak 构建专项细节。
 
@@ -227,7 +227,7 @@ data/
 - --device=dri         # GPU 硬件加速
 ```
 
-> 注意：Szyszka 不需要 `--filesystem=host`，因为用户通过 GTK 文件选择器添加文件，不需要直接访问文件系统。
+> 注意：NeoSzyszka 不需要 `--filesystem=host`，因为用户通过 GTK 文件选择器添加文件，不需要直接访问文件系统。
 
 ### 4.3 Rust SDK 扩展
 

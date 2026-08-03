@@ -5,7 +5,7 @@ SZYSZKA_PATH="/home/rafal"
 cd "$SZYSZKA_PATH"
 SZYSZKA_PATH="$SZYSZKA_PATH/szyszka"
 rm -rf $SZYSZKA_PATH
-git clone https://github.com/Sam-Fic/szyszka.git "$SZYSZKA_PATH"
+git clone https://github.com/Sam-Fic/NeoSzyszka.git "$SZYSZKA_PATH"
 cd $SZYSZKA_PATH
 git checkout "$NUMBER"
 cargo package

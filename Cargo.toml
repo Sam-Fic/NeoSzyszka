@@ -7,8 +7,8 @@ authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>", "Sam-Fic <samfic@foxmai
 edition = "2021"
 description = "Fast, powerful and easy to use file renamer (GTK/Adwaita port)"
 license = "MIT"
-homepage = "https://github.com/Sam-Fic/szyszka"
-repository = "https://github.com/Sam-Fic/szyszka"
+homepage = "https://github.com/Sam-Fic/NeoSzyszka"
+repository = "https://github.com/Sam-Fic/NeoSzyszka"
 rust-version = "1.89"
 build = "build.rs"
 

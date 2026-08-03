@@ -2,7 +2,7 @@
 Type=Application
 Terminal=false
 Exec=szyszka
-Name=Szyszka
+Name=NeoSzyszka
 Comment=Simple app to rename files but with powerful rules
 Icon=com.github.samfic.szyszka
 Categories=System;

@@ -31,7 +31,7 @@ pub fn handle_help_version(arguments: &[String]) {
     };
     if second == "-h" || second == "--help" {
         println!("Usage: szyszka [OPTION]... [FILE]...");
-        println!("Szyszka is simple utility to rename files and folders");
+        println!("NeoSzyszka is simple utility to rename files and folders");
         println!();
         println!("  -h, --help     display this help and exit");
         println!("  -v, --version  output version information and exit");

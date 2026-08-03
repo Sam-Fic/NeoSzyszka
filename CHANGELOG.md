@@ -1,5 +1,5 @@
 ## Fork (Sam-Fic)
-Rewrite of the UI with **GTK 4 and libadwaita** (GNOME HIG compliant). Fork maintained by Sam-Fic — <https://github.com/Sam-Fic/szyszka>. Based on Szyszka by Rafał Mikrut (<https://github.com/qarmin/szyszka>).
+Rewrite of the UI with **GTK 4 and libadwaita** (GNOME HIG compliant). Fork maintained by Sam-Fic — <https://github.com/Sam-Fic/NeoSzyszka>. Based on Szyszka by Rafał Mikrut (<https://github.com/qarmin/szyszka>).
 
 ## Version 3.0.0 - 24.02.2023r
 - Builtin icons - [#70](https://github.com/qarmin/szyszka/pull/70), [#71](https://github.com/qarmin/szyszka/pull/71)

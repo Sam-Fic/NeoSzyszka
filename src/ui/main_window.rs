@@ -150,7 +150,7 @@ pub struct GtkApp {
 pub fn build_gtk_app(app: &adw::Application, state: SharedState, editor_state: SharedEditorState, gui_state: SharedGuiState, translations: Rc<RefCell<Translations>>) -> GtkApp {
     let window = adw::ApplicationWindow::builder()
         .application(app)
-        .title("Szyszka")
+        .title("NeoSzyszka")
         .default_width(1100)
         .default_height(720)
         .width_request(800)
@@ -292,13 +292,13 @@ pub fn build_gtk_app(app: &adw::Application, state: SharedState, editor_state: S
         let action = gio::ActionEntry::builder("about")
             .activate(move |_, _, _| {
                 let about = adw::AboutWindow::builder()
-                    .application_name("Szyszka")
+                    .application_name("NeoSzyszka")
                     .application_icon("com.github.samfic.szyszka")
                     .version(env!("CARGO_PKG_VERSION"))
                     .copyright("Copyright © 2021 Rafał Mikrut\nCopyright © 2026 Sam-Fic")
-                    .comments("Fork of Szyszka by Rafał Mikrut (https://github.com/qarmin/szyszka). Rewritten with GTK 4 and libadwaita (GNOME HIG).")
-                    .website("https://github.com/Sam-Fic/szyszka")
-                    .issue_url("https://github.com/Sam-Fic/szyszka/issues")
+                    .comments("Fork of Szyszka by Rafał Mikrut (https://github.com/qarmin/szyszka). Rewritten with GTK 4 and libadwaita (GNOME HIG) and maintained as NeoSzyszka by Sam-Fic.")
+                    .website("https://github.com/Sam-Fic/NeoSzyszka")
+                    .issue_url("https://github.com/Sam-Fic/NeoSzyszka/issues")
                     .license_type(gtk::License::MitX11)
                     .build();
                 about.set_developers(&["Rafał Mikrut", "Sam-Fic"]);

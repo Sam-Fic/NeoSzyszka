@@ -36,7 +36,7 @@ impl Default for SettingsJson {
 }
 
 pub fn get_config_path() -> Option<PathBuf> {
-    ProjectDirs::from("com", "github.samfic", "Szyszka").map(|p| PathBuf::from(p.config_dir()))
+    ProjectDirs::from("com", "github.samfic", "NeoSzyszka").map(|p| PathBuf::from(p.config_dir()))
 }
 
 pub fn get_settings_file() -> Option<PathBuf> {
