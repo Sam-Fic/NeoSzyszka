@@ -4,6 +4,8 @@
   <img src="data/icons/com.github.samfic.szyszka.svg" alt="NeoSzyszka" width="128" height="128">
 </div>
 
+[简体中文](README.zh-CN.md)
+
 > **Fork notice:** This is a fork of [Szyszka](https://github.com/qarmin/szyszka) by **Rafał Mikrut**, rewritten with **GTK 4 and libadwaita** (GNOME HIG compliant).
 > Original author: Rafał Mikrut — original repository: <https://github.com/qarmin/szyszka>. This fork is maintained by [Sam-Fic](https://github.com/Sam-Fic/NeoSzyszka).
 

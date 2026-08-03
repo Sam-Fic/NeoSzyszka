@@ -4,6 +4,8 @@
   <img src="data/icons/com.github.samfic.szyszka.svg" alt="NeoSzyszka" width="128" height="128">
 </div>
 
+[English](README.md)
+
 > **分支说明：** 这是 **Rafał Mikrut** 开发的 [Szyszka](https://github.com/qarmin/szyszka) 的一个分支，使用 **GTK 4 和 libadwaita** 重新编写（符合 GNOME 人机界面指南）。  
 > 原作者：Rafał Mikrut —— 原仓库地址：<https://github.com/qarmin/szyszka>。该分支由 [Sam-Fic](https://github.com/Sam-Fic/NeoSzyszka) 维护。
 
