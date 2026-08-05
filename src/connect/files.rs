@@ -1,7 +1,8 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering as AtomicOrdering;
 use std::sync::{mpsc, Arc};
 
+use crate::config::{load_last_directory, save_last_directory};
 use crate::connect::progress::{hide_overlay, show_overlay};
 use crate::connect::rules_ops::refresh_outdated_or_recompute;
 use crate::connect::sync::sync_files;
@@ -9,14 +10,46 @@ use crate::files::{collect_files_async, enumerate_folder_contents, sort_files, I
 use crate::state::SharedState;
 use crate::ui::state_ui::SharedGuiState;
 
+/// Pick a sensible starting directory for a file chooser.
+///
+/// Falls back through: remembered directory (persisted across sessions) ->
+/// directory of the most recently added file -> none (chooser default).
+fn initial_dialog_directory(state: &SharedState) -> Option<PathBuf> {
+    if let Some(dir) = load_last_directory() {
+        return Some(dir);
+    }
+
+    let last_added = state.borrow().files.last().map(|item| PathBuf::from(&item.path));
+    last_added.filter(|p| p.is_dir())
+}
+
+fn apply_initial_directory(dialog: rfd::AsyncFileDialog, state: &SharedState) -> rfd::AsyncFileDialog {
+    match initial_dialog_directory(state) {
+        Some(dir) => dialog.set_directory(dir),
+        None => dialog,
+    }
+}
+
+/// Remember where the user last browsed, so the next chooser opens there.
+fn remember_directory(picked: &[PathBuf], is_folder_pick: bool) {
+    let Some(last) = picked.last() else { return };
+    // Folder picks land *in* the chosen directory; file picks land in its parent.
+    let dir: Option<&Path> = if is_folder_pick { Some(last.as_path()) } else { last.parent() };
+    if let Some(dir) = dir {
+        save_last_directory(dir);
+    }
+}
+
 pub fn pick_files_and_add(state: &SharedState, store: &gio::ListStore, gui_state: &SharedGuiState) {
     let state = state.clone();
     let store = store.clone();
     let gui_state = gui_state.clone();
     glib::spawn_future_local(async move {
-        let files = rfd::AsyncFileDialog::new().set_title("Add files").pick_files().await;
+        let dialog = apply_initial_directory(rfd::AsyncFileDialog::new(), &state).set_title("Add files");
+        let files = dialog.pick_files().await;
         let Some(files) = files else { return };
         let paths: Vec<PathBuf> = files.into_iter().map(|f| f.path().into()).collect();
+        remember_directory(&paths, false);
         let sorted = sort_files(paths);
         start_async_scan(&sorted, &state, &store, &gui_state, "Adding files…");
     });
@@ -50,13 +83,15 @@ pub fn pick_folders_into_state(state: &SharedState, store: &gio::ListStore, gui_
     let gui_state = gui_state.clone();
     let window = window.clone();
     glib::spawn_future_local(async move {
-        let folders = rfd::AsyncFileDialog::new().set_title("Add folders").pick_folders().await;
+        let dialog = apply_initial_directory(rfd::AsyncFileDialog::new(), &state).set_title("Add folders");
+        let folders = dialog.pick_folders().await;
         let Some(folders) = folders else { return };
         if folders.is_empty() {
             return;
         }
 
         let paths: Vec<PathBuf> = folders.into_iter().map(|f| f.path().into()).collect();
+        remember_directory(&paths, true);
         let display: Vec<String> = paths.iter().map(|p| p.display().to_string()).collect();
         gui_state.borrow_mut().add_folder_picked_paths = display;
         state.borrow_mut().pending_folders = paths;

@@ -24,6 +24,8 @@ const BASIC_RULE_CONTENT: &str = "[]";
 struct SettingsJson {
     dark_theme: bool,
     language: String,
+    #[serde(default)]
+    last_directory: String,
 }
 
 impl Default for SettingsJson {
@@ -31,6 +33,7 @@ impl Default for SettingsJson {
         Self {
             dark_theme: true,
             language: "English".to_string(),
+            last_directory: String::new(),
         }
     }
 }
@@ -93,6 +96,25 @@ pub fn load_saved_language() -> String {
 pub fn save_language(combo_text: &str) {
     let mut s = load_settings();
     s.language = combo_text.to_string();
+    save_settings(&s);
+}
+
+/// Last directory used in a file/folder chooser, if it still exists on disk.
+pub fn load_last_directory() -> Option<PathBuf> {
+    let saved = load_settings().last_directory;
+    if saved.is_empty() {
+        return None;
+    }
+    let path = PathBuf::from(saved);
+    path.is_dir().then_some(path)
+}
+
+pub fn save_last_directory(dir: &Path) {
+    if !dir.is_dir() {
+        return;
+    }
+    let mut s = load_settings();
+    s.last_directory = dir.display().to_string();
     save_settings(&s);
 }
 
