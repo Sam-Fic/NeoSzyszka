@@ -115,6 +115,7 @@ jobs:
           cargo build --release
           cp target/release/szyszka.exe "$APP_BIN/NeoSzyszka.exe"
           cp LICENSE "$APP_ROOT/LICENSE.txt"
+          cp data/icons/com.github.samfic.szyszka.ico "$APP_ROOT/NeoSzyszka.ico"
 
           # ntldd recursively discovers every non-system DLL used by the executable.
           ntldd -R "$APP_BIN/NeoSzyszka.exe" \
@@ -154,12 +155,20 @@ jobs:
 
           glib-compile-schemas "$APP_ROOT/share/glib-2.0/schemas"
 
+          # Provide the application icon through the standard hicolor fallback theme.
+          mkdir -p "$APP_ROOT/share/icons/hicolor/scalable/apps" "$APP_ROOT/share/icons/hicolor/1024x1024/apps"
+          cp data/icons/com.github.samfic.szyszka.svg "$APP_ROOT/share/icons/hicolor/scalable/apps/com.github.samfic.szyszka.svg"
+          cp data/icons/com.github.samfic.szyszka.png "$APP_ROOT/share/icons/hicolor/1024x1024/apps/com.github.samfic.szyszka.png"
+          gtk4-update-icon-cache -f -t "$APP_ROOT/share/icons/hicolor"
+
           cat > "$APP_ROOT/NeoSzyszka.cmd" <<'CMD'
           @echo off
           setlocal
           set "APP_DIR=%~dp0"
           set "PATH=%APP_DIR%bin;%PATH%"
+          set "XDG_DATA_HOME=%APP_DIR%share"
           set "XDG_DATA_DIRS=%APP_DIR%share"
+          set "GTK_DATA_PREFIX=%APP_DIR%"
           set "GSETTINGS_SCHEMA_DIR=%APP_DIR%share\glib-2.0\schemas"
           start "" "%APP_DIR%bin\NeoSzyszka.exe" %*
           CMD
@@ -213,7 +222,21 @@ jobs:
 
           cp target/release/szyszka "$MACOS_DIR/NeoSzyszka-bin"
           cp LICENSE "$RESOURCES_DIR/LICENSE.txt"
-          cp data/icons/com.github.samfic.szyszka.svg "$RESOURCES_DIR/NeoSzyszka.svg"
+
+          # Finder and Dock require a native ICNS icon. Generate all standard resolutions from
+          # the canonical 1024 px PNG, which itself is generated from the source SVG.
+          ICONSET="$PWD/dist/NeoSzyszka.iconset"
+          mkdir -p "$ICONSET"
+          for spec in \
+            '16:16' '16:32@2x' '32:32' '32:64@2x' '128:128' \
+            '128:256@2x' '256:256' '256:512@2x' '512:512' '512:1024@2x'; do
+              name="${spec%%:*}"
+              pixels="${spec#*:}"
+              sips -z "${pixels%@2x}" "${pixels%@2x}" data/icons/com.github.samfic.szyszka.png \
+                --out "$ICONSET/icon_${name}x${name}${pixels#${pixels%@2x}}.png" >/dev/null
+            done
+          iconutil -c icns "$ICONSET" -o "$RESOURCES_DIR/NeoSzyszka.icns"
+          rm -rf "$ICONSET"
 
           cat > "$APP_ROOT/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -225,6 +248,7 @@ jobs:
             <key>CFBundleExecutable</key><string>NeoSzyszka</string>
             <key>CFBundleIdentifier</key><string>com.github.samfic.szyszka</string>
             <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+            <key>CFBundleIconFile</key><string>NeoSzyszka</string>
             <key>CFBundleName</key><string>NeoSzyszka</string>
             <key>CFBundlePackageType</key><string>APPL</string>
             <key>CFBundleShortVersionString</key><string>VERSION_PLACEHOLDER</string>
@@ -239,7 +263,9 @@ jobs:
           cat > "$MACOS_DIR/NeoSzyszka" <<'SH'
           #!/bin/sh
           APP_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+          export XDG_DATA_HOME="$APP_ROOT/Resources/share"
           export XDG_DATA_DIRS="$APP_ROOT/Resources/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+          export GTK_DATA_PREFIX="$APP_ROOT/Resources"
           export GSETTINGS_SCHEMA_DIR="$APP_ROOT/Resources/share/glib-2.0/schemas"
           exec "$APP_ROOT/MacOS/NeoSzyszka-bin" "$@"
           SH
@@ -263,6 +289,12 @@ jobs:
               fi
             done
           glib-compile-schemas "$RESOURCES_DIR/share/glib-2.0/schemas"
+
+          # The in-app About dialog resolves the application icon through the hicolor fallback theme.
+          mkdir -p "$RESOURCES_DIR/share/icons/hicolor/scalable/apps" "$RESOURCES_DIR/share/icons/hicolor/1024x1024/apps"
+          cp data/icons/com.github.samfic.szyszka.svg "$RESOURCES_DIR/share/icons/hicolor/scalable/apps/com.github.samfic.szyszka.svg"
+          cp data/icons/com.github.samfic.szyszka.png "$RESOURCES_DIR/share/icons/hicolor/1024x1024/apps/com.github.samfic.szyszka.png"
+          gtk4-update-icon-cache -f -t "$RESOURCES_DIR/share/icons/hicolor"
 
           # Ad-hoc signing makes the bundle internally consistent. Distribution signing and notarization
           # can later be added with Apple Developer credentials without changing the package layout.

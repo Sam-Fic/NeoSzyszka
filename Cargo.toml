@@ -12,6 +12,9 @@ repository = "https://github.com/Sam-Fic/NeoSzyszka"
 rust-version = "1.89"
 build = "build.rs"
 
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1.31"
+
 [dependencies]
 gtk4 = { version = "0.9", features = ["v4_12"] }
 libadwaita = { version = "0.7", features = ["v1_5"] }
