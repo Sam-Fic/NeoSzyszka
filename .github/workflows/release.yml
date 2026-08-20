@@ -343,37 +343,15 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           path: artifacts
-      - name: Generate release notes from AppStream metadata
+      - name: Validate canonical release notes
         env:
           VERSION: ${{ needs.metadata.outputs.version }}
         run: |
-          python3 - <<'PY' > /tmp/release-notes.md
-          import os
-          import xml.etree.ElementTree as ET
-
-          version = os.environ["VERSION"]
-          root = ET.parse("data/com.github.samfic.szyszka.metainfo.xml").getroot()
-          for release in root.findall(".//release"):
-              if release.get("version") != version:
-                  continue
-              description = release.find("description")
-              if description is None:
-                  break
-              parts = []
-              for paragraph in description.findall(".//p"):
-                  text = "".join(paragraph.itertext()).strip()
-                  if text:
-                      parts.append(text)
-              for item in description.findall(".//li"):
-                  text = "".join(item.itertext()).strip()
-                  if text:
-                      parts.append(f"- {text}")
-              print("\n".join(parts))
-              break
-          PY
-          if [ ! -s /tmp/release-notes.md ]; then
-            printf 'Release v%s\n' "$VERSION" > /tmp/release-notes.md
-          fi
+          set -euo pipefail
+          NOTES_FILE="release-notes/v${VERSION}.md"
+          test -f "$NOTES_FILE"
+          python3 scripts/generate_release_notes.py --check "$NOTES_FILE"
+          cp "$NOTES_FILE" /tmp/release-notes.md
           cat /tmp/release-notes.md
       - name: Create or update GitHub release
         uses: softprops/action-gh-release@v2

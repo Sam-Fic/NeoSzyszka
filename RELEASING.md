@@ -4,13 +4,13 @@
 
 > 本文档供 AI 编程助手在协助构建和发布版本时参考。
 >
-> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成。推送 `v*` tag 后，CI 将并行构建并上传以下产物：Linux `szyszka-X.Y.Z.flatpak`、Windows `szyszka-X.Y.Z-windows-x86_64.zip`、Intel macOS `szyszka-X.Y.Z-macos-x86_64.dmg` 与 Apple Silicon macOS `szyszka-X.Y.Z-macos-aarch64.dmg`。Windows ZIP 含 GTK/libadwaita 运行时，macOS DMG 含 `.app` 与所需动态库；后者为临时签名，尚未经过 Apple Developer ID 签名或公证。
+> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成。推送 `v*` tag 后，CI 将并行构建并上传以下产物：Linux `szyszka-X.Y.Z.flatpak`、Windows `szyszka-X.Y.Z-windows-x86_64.zip`、Intel macOS `szyszka-X.Y.Z-macos-x86_64.dmg` 与 Apple Silicon macOS `szyszka-X.Y.Z-macos-aarch64.dmg`。正式 Release 日志唯一读取 `release-notes/vX.Y.Z.md`；Windows ZIP 含 GTK/libadwaita 运行时，macOS DMG 含 `.app` 与所需动态库；后者为临时签名，尚未经过 Apple Developer ID 签名或公证。
 >
 > 从 Actions 页面手动运行 `Release packages` 时，CI 会生成带 `snapshot-<commit>` 版本号的相同平台产物作为工作流 artifact，但**不会**创建 GitHub Release。此模式适合在打 tag 前验证打包流程。
 >
-> 因此 **AI 在本地只负责「版本元数据」与「提交 + 打 tag + 推送」**，不要本地执行 flatpak 构建，也不要手动 `gh release create`（会重复创建或与 CI 冲突）。构建与发布一律交给 CI。
+> 因此 **AI 在本地只负责「生成并审阅 Release 日志、版本元数据」与「提交 + 打 tag + 推送」**，不要本地执行 flatpak 构建，也不要手动 `gh release create`（会重复创建或与 CI 冲突）。构建与发布一律交给 CI。
 >
-> **AI 应自动完成**：确定 changelog → 更新 `Cargo.toml` / `Cargo.lock` / `metainfo.xml` → commit → tag → push。无需用户手动执行任何步骤。
+> **AI 应自动完成**：以 LLM 根据变更生成候选日志 → 确定性校验格式 → 审阅并合并 `release-notes/vX.Y.Z.md` → 更新 `Cargo.toml` / `Cargo.lock` / `metainfo.xml` → commit → tag → push。LLM 生成不直接发布，且无需用户手动执行任何步骤。
 
 ## 一、前置条件
 
@@ -65,12 +65,23 @@ git log v4.0.0..HEAD --stat --name-only
 
 ---
 
-### 2.3 更新版本号
+### 2.3 用 LLM 生成并审阅规范 Release 日志
 
-需要修改 **3 个文件**：
+> Release Notes 的固定格式为中文 `### 主要改进` 和英文 `### Improvements` 两个小节，两个小节包含数量相同的 2–6 条加粗标题列表。最终 Markdown 由脚本渲染和校验，模型不能自行改变标题、列表、Markdown 语法或条目数量。
+
+在 GitHub Actions 的 **Generate release notes draft** 工作流中输入目标版本，例如 `4.2.0`。工作流会读取上一版本标签之后的提交主题与变更文件清单，通过 `OPENAI_API_KEY` 调用 LLM，并创建仅包含 `release-notes/v4.2.0.md` 的候选 PR。该工作流不会创建 tag、Release 或安装包。
+
+审阅 PR 时需确认每一条用户可见、事实准确、没有把内部重构或 CI 细节误写成产品特性。合并 PR 后，标签发布的 `release.yml` 会再次运行 `scripts/generate_release_notes.py --check`；如果缺少日志文件或格式不符合约定，发布会在上传 Release 前失败。
+
+配置一次 GitHub Actions secret `OPENAI_API_KEY`，可选设置 `OPENAI_BASE_URL` 与 `OPENAI_MODEL` repository variables。密钥只在草稿生成工作流中使用，绝不写入仓库、日志或正式发布工作流。默认模型为 `gpt-5-mini`，但可通过 `OPENAI_MODEL` 覆盖。
+
+### 2.4 更新版本号
+
+需要修改 **4 个文件**：
 
 | 文件                                          | 修改内容                                                                                                    |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `release-notes/vX.Y.Z.md`                     | 由 LLM 草稿工作流生成、人工审阅合并，并通过格式校验；这是 GitHub Release 的唯一日志来源                     |
 | `Cargo.toml`                                  | 第 5 行 `version = "x.y.z"`（此为唯一版本源）                                                               |
 | `Cargo.lock`                                  | 运行 `cargo check` 自动更新                                                                                 |
 | `data/com.github.samfic.szyszka.metainfo.xml` | 在 `<releases>` 内新增 `<release>` 条目，按版本号**从新到旧**排列，`date` 使用当天日期（格式 `YYYY-MM-DD`） |
@@ -91,23 +102,24 @@ git log v4.0.0..HEAD --stat --name-only
 
 > 💡 `date` 属性使用当天日期，格式为 `YYYY-MM-DD`。
 
-### 2.4 提交、打标签与推送
+### 2.5 提交、打标签与推送
 
 > **推送即发布**：推 `v*` tag 后，`release.yml` 会自动构建三平台产物并创建 GitHub Release。所以这一步之后 AI 无需再做构建或发布操作，只需等待 CI 完成并验证结果。
 
 AI 应直接执行以下命令，无需询问用户：
 
 ```bash
-# 更新 Cargo.lock
+# 更新 Cargo.lock，并确认 Release Notes 未被手工破坏
 cargo check
+python3 scripts/generate_release_notes.py --check release-notes/vX.Y.Z.md
 
-git add Cargo.toml Cargo.lock data/com.github.samfic.szyszka.metainfo.xml
+git add Cargo.toml Cargo.lock data/com.github.samfic.szyszka.metainfo.xml release-notes/vX.Y.Z.md
 git commit -m "release: vX.Y.Z"
 git tag vX.Y.Z
 git push && git push origin vX.Y.Z
 ```
 
-### 2.5 本地构建 Flatpak（仅用于验证，不参与发布）
+### 2.6 本地构建 Flatpak（仅用于验证，不参与发布）
 
 > ⚠️ **本地产物不进入发布流程**：实际发布由 `release.yml` CI 自动完成。以下本地步骤仅供开发期快速验证（确认能打包/能运行），**不要**把本地导出的 `.flatpak` 手动传到 GitHub Release——那会与 CI 自动创建的 Release 重复或冲突。
 
@@ -362,12 +374,13 @@ rm -rf vendor/
 
 ## 七、发布到 GitHub Releases（由 CI 自动完成）
 
-> **不要手动创建 Release**：`.github/workflows/release.yml` 的 `release` job 会在 `v*` tag 推送后，自动下载三平台 artifact、从 `metainfo.xml` 提取对应版本 notes、创建（唯一的）GitHub Release 并上传全部安装包。手动 `gh release create` 会与 CI 重复，导致两个 Release 或上传冲突。
+> **不要手动创建 Release**：`.github/workflows/release.yml` 的 `release` job 会在 `v*` tag 推送后，自动下载三平台 artifact、校验并读取 `release-notes/vX.Y.Z.md`、创建（唯一的）GitHub Release 并上传全部安装包。手动 `gh release create` 会与 CI 重复，导致两个 Release 或上传冲突。
 
 ### 7.1 推送 tag 前的自检（CI 前置条件）
 
 确保满足以下条件，否则 CI 发布会失败或 notes 为空：
 
+- `release-notes/vX.Y.Z.md` 已由候选 PR 审阅合并，并通过 `python3 scripts/generate_release_notes.py --check release-notes/vX.Y.Z.md`；
 - `metainfo.xml` 的 `<releases>` 顶部已存在与本次 tag 版本**完全一致**的 `<release version="X.Y.Z">` 条目（无 `v` 前缀）；
 - `Cargo.toml` 的 `version` 与 tag 版本一致；
 - 已 `git push origin vX.Y.Z` 推送 tag（仅 push 分支不会触发 `release.yml`，它只在 `tags: ['v*']` 时运行）。
