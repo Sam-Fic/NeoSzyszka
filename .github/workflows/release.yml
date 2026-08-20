@@ -99,6 +99,7 @@ jobs:
             mingw-w64-x86_64-rust
             mingw-w64-x86_64-gtk4
             mingw-w64-x86_64-libadwaita
+            mingw-w64-x86_64-adwaita-icon-theme
             mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-ntldd
       - name: Build and assemble portable package
@@ -155,6 +156,12 @@ jobs:
 
           glib-compile-schemas "$APP_ROOT/share/glib-2.0/schemas"
 
+          # Ship the entire GNOME Adwaita symbol/icon theme and hicolor fallback theme.
+          # Both `index.theme` files and their caches are required for GTK name resolution.
+          test -f "$APP_ROOT/share/icons/Adwaita/index.theme"
+          test -f "$APP_ROOT/share/icons/hicolor/index.theme"
+          gtk4-update-icon-cache -f -t "$APP_ROOT/share/icons/Adwaita"
+
           # Provide the application icon through the standard hicolor fallback theme.
           mkdir -p "$APP_ROOT/share/icons/hicolor/scalable/apps" "$APP_ROOT/share/icons/hicolor/1024x1024/apps"
           cp data/icons/com.github.samfic.szyszka.svg "$APP_ROOT/share/icons/hicolor/scalable/apps/com.github.samfic.szyszka.svg"
@@ -203,7 +210,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install GTK, libadwaita and bundling tools
-        run: brew install gtk4 libadwaita pkg-config dylibbundler
+        run: brew install gtk4 libadwaita adwaita-icon-theme hicolor-icon-theme pkg-config dylibbundler
       - name: Build and bundle macOS application
         env:
           VERSION: ${{ needs.metadata.outputs.version }}
@@ -282,13 +289,23 @@ jobs:
           for directory in \
             "$(brew --prefix glib)/share/glib-2.0" \
             "$(brew --prefix gtk4)/share/gtk-4.0" \
-            "$(brew --prefix libadwaita)/share/libadwaita-1" \
-            "$(brew --prefix adwaita-icon-theme)/share/icons"; do
+            "$(brew --prefix libadwaita)/share/libadwaita-1"; do
               if [ -d "$directory" ]; then
                 cp -R "$directory" "$RESOURCES_DIR/share/"
               fi
             done
           glib-compile-schemas "$RESOURCES_DIR/share/glib-2.0/schemas"
+
+          # Copy each complete GNOME theme directly to its standard XDG location. Copying the
+          # parent `icons` directory twice could nest the second theme under `icons/icons`.
+          mkdir -p "$RESOURCES_DIR/share/icons"
+          cp -R "$(brew --prefix adwaita-icon-theme)/share/icons/Adwaita" "$RESOURCES_DIR/share/icons/Adwaita"
+          cp -R "$(brew --prefix hicolor-icon-theme)/share/icons/hicolor" "$RESOURCES_DIR/share/icons/hicolor"
+
+          # Rebuild caches after copying the full GNOME icon themes into the application bundle.
+          test -f "$RESOURCES_DIR/share/icons/Adwaita/index.theme"
+          test -f "$RESOURCES_DIR/share/icons/hicolor/index.theme"
+          gtk4-update-icon-cache -f -t "$RESOURCES_DIR/share/icons/Adwaita"
 
           # The in-app About dialog resolves the application icon through the hicolor fallback theme.
           mkdir -p "$RESOURCES_DIR/share/icons/hicolor/scalable/apps" "$RESOURCES_DIR/share/icons/hicolor/1024x1024/apps"
