@@ -1,68 +1,95 @@
-name: 🚀 Release
+name: Release packages
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  metadata:
+    name: Prepare release metadata
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_release: ${{ steps.version.outputs.is_release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Resolve package version
+        id: version
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            IS_RELEASE=true
+          else
+            VERSION="snapshot-${GITHUB_SHA::7}"
+            IS_RELEASE=false
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "is_release=${IS_RELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Preparing packages for ${VERSION}"
+
   flatpak:
-    name: 📦 Flatpak Bundle
-    runs-on: ubuntu-latest
+    name: Flatpak bundle
+    needs: metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     container:
       image: bilelmoussaoui/flatpak-github-actions:gnome-47
       options: --privileged
     env:
       CARGO_HOME: /root/.cargo
       RUSTUP_HOME: /root/.rustup
-
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Install Rust
+      - name: Install Rust used to vendor dependencies
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.96.1 --no-modify-path
           echo "/root/.cargo/bin" >> "$GITHUB_PATH"
           /root/.cargo/bin/rustc --version
-
       - name: Vendor Cargo dependencies
         run: cargo vendor
-
-      - name: Install Rust SDK extension
+      - name: Install Flatpak Rust SDK extension
         run: flatpak install -y org.freedesktop.Sdk.Extension.rust-stable//24.08
-
-      - name: Build Flatpak
-        run: |
-          flatpak-builder --repo=repo build-dir flatpak/com.github.samfic.szyszka.yml --force-clean
-
+      - name: Build Flatpak repository
+        run: flatpak-builder --repo=repo build-dir flatpak/com.github.samfic.szyszka.yml --force-clean
       - name: Export Flatpak bundle
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
         run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          flatpak build-bundle repo szyszka-${VERSION}.flatpak com.github.samfic.szyszka
-          ls -lh szyszka-*.flatpak
-
-      - name: Upload artifact
+          BUNDLE="szyszka-${VERSION}.flatpak"
+          flatpak build-bundle repo "$BUNDLE" com.github.samfic.szyszka
+          test -s "$BUNDLE"
+          ls -lh "$BUNDLE"
+      - name: Upload Flatpak bundle
         uses: actions/upload-artifact@v6
         with:
-          name: szyszka-${{ steps.version.outputs.VERSION }}-flatpak
-          path: szyszka-*.flatpak
+          name: szyszka-${{ needs.metadata.outputs.version }}-flatpak
+          path: szyszka-${{ needs.metadata.outputs.version }}.flatpak
+          if-no-files-found: error
+          compression-level: 0
 
   windows:
-    name: 🏁 Windows Binary
+    name: Windows portable package
+    needs: metadata
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install GTK dependencies and Rust (MSYS2)
+      - name: Install GTK, libadwaita, Rust and packaging tools
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -73,93 +100,239 @@ jobs:
             mingw-w64-x86_64-gtk4
             mingw-w64-x86_64-libadwaita
             mingw-w64-x86_64-pkgconf
-
-      - name: Build Release
+            mingw-w64-x86_64-ntldd
+      - name: Build and assemble portable package
         shell: msys2 {0}
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
         run: |
-          cargo build --release
-          cp target/release/szyszka.exe windows_szyszka.exe
+          set -euo pipefail
 
-      - name: Upload artifact
+          APP_ROOT="$PWD/dist/NeoSzyszka"
+          APP_BIN="$APP_ROOT/bin"
+          mkdir -p "$APP_BIN"
+
+          cargo build --release
+          cp target/release/szyszka.exe "$APP_BIN/NeoSzyszka.exe"
+          cp LICENSE "$APP_ROOT/LICENSE.txt"
+
+          # ntldd recursively discovers every non-system DLL used by the executable.
+          ntldd -R "$APP_BIN/NeoSzyszka.exe" \
+            | sed -nE 's|.*(/mingw64/bin/[^[:space:]]+\.dll).*|\1|p' \
+            | sort -u \
+            | while IFS= read -r dll; do
+                cp -n "$dll" "$APP_BIN/"
+              done
+
+          # GTK loads schemas, themes, icons and optional image modules at runtime.
+          for directory in \
+            "$MINGW_PREFIX/share/glib-2.0/schemas" \
+            "$MINGW_PREFIX/share/icons/Adwaita" \
+            "$MINGW_PREFIX/share/icons/hicolor" \
+            "$MINGW_PREFIX/share/libadwaita-1" \
+            "$MINGW_PREFIX/share/gtk-4.0" \
+            "$MINGW_PREFIX/etc/fonts" \
+            "$MINGW_PREFIX/lib/gdk-pixbuf-2.0" \
+            "$MINGW_PREFIX/lib/gtk-4.0"; do
+              if [ -d "$directory" ]; then
+                destination="$APP_ROOT/${directory#${MINGW_PREFIX}/}"
+                mkdir -p "$(dirname "$destination")"
+                cp -a "$directory" "$destination"
+              fi
+            done
+
+          # Runtime modules can themselves depend on DLLs not linked by the executable.
+          find "$APP_ROOT/lib" -type f -name '*.dll' -print0 2>/dev/null \
+            | while IFS= read -r -d '' module; do
+                ntldd -R "$module" \
+                  | sed -nE 's|.*(/mingw64/bin/[^[:space:]]+\.dll).*|\1|p' \
+                  | sort -u \
+                  | while IFS= read -r dll; do
+                      cp -n "$dll" "$APP_BIN/"
+                    done
+              done
+
+          glib-compile-schemas "$APP_ROOT/share/glib-2.0/schemas"
+
+          cat > "$APP_ROOT/NeoSzyszka.cmd" <<'CMD'
+          @echo off
+          setlocal
+          set "APP_DIR=%~dp0"
+          set "PATH=%APP_DIR%bin;%PATH%"
+          set "XDG_DATA_DIRS=%APP_DIR%share"
+          set "GSETTINGS_SCHEMA_DIR=%APP_DIR%share\glib-2.0\schemas"
+          start "" "%APP_DIR%bin\NeoSzyszka.exe" %*
+          CMD
+
+          ZIP_PATH="$PWD/dist/szyszka-${VERSION}-windows-x86_64.zip"
+          APP_ROOT_WINDOWS="$(cygpath -w "$APP_ROOT")"
+          ZIP_PATH_WINDOWS="$(cygpath -w "$ZIP_PATH")"
+          powershell.exe -NoProfile -Command "Compress-Archive -Path '${APP_ROOT_WINDOWS}' -DestinationPath '${ZIP_PATH_WINDOWS}' -Force"
+          test -s "$ZIP_PATH"
+          ls -lh "$ZIP_PATH"
+      - name: Upload Windows portable package
         uses: actions/upload-artifact@v6
         with:
-          name: szyszka-windows
-          path: windows_szyszka.exe
+          name: szyszka-${{ needs.metadata.outputs.version }}-windows-x86_64
+          path: dist/szyszka-${{ needs.metadata.outputs.version }}-windows-x86_64.zip
+          if-no-files-found: error
+          compression-level: 0
 
   macos:
-    name: 🍎 macOS Binary
-    runs-on: macos-latest
+    name: macOS application (${{ matrix.arch }})
+    needs: metadata
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            arch: x86_64
+          - runner: macos-14
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install dependencies
+      - name: Install GTK, libadwaita and bundling tools
+        run: brew install gtk4 libadwaita pkg-config dylibbundler
+      - name: Build and bundle macOS application
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+          ARCH: ${{ matrix.arch }}
         run: |
-          brew install gtk4 libadwaita pkg-config
+          set -euo pipefail
 
-      - name: Setup rust version
-        run: rustup default 1.96.1
-
-      - name: Build Release
-        run: |
+          rustup default 1.96.1
           cargo build --release
-          mv target/release/szyszka mac_szyszka
 
-      - name: Upload artifact
+          APP_ROOT="$PWD/dist/NeoSzyszka.app"
+          MACOS_DIR="$APP_ROOT/Contents/MacOS"
+          FRAMEWORKS_DIR="$APP_ROOT/Contents/Frameworks"
+          RESOURCES_DIR="$APP_ROOT/Contents/Resources"
+          mkdir -p "$MACOS_DIR" "$FRAMEWORKS_DIR" "$RESOURCES_DIR"
+
+          cp target/release/szyszka "$MACOS_DIR/NeoSzyszka-bin"
+          cp LICENSE "$RESOURCES_DIR/LICENSE.txt"
+          cp data/icons/com.github.samfic.szyszka.svg "$RESOURCES_DIR/NeoSzyszka.svg"
+
+          cat > "$APP_ROOT/Contents/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleDevelopmentRegion</key><string>en</string>
+            <key>CFBundleDisplayName</key><string>NeoSzyszka</string>
+            <key>CFBundleExecutable</key><string>NeoSzyszka</string>
+            <key>CFBundleIdentifier</key><string>com.github.samfic.szyszka</string>
+            <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+            <key>CFBundleName</key><string>NeoSzyszka</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleShortVersionString</key><string>VERSION_PLACEHOLDER</string>
+            <key>CFBundleVersion</key><string>VERSION_PLACEHOLDER</string>
+            <key>LSMinimumSystemVersion</key><string>13.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          sed -i '' "s/VERSION_PLACEHOLDER/${VERSION}/g" "$APP_ROOT/Contents/Info.plist"
+
+          cat > "$MACOS_DIR/NeoSzyszka" <<'SH'
+          #!/bin/sh
+          APP_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+          export XDG_DATA_DIRS="$APP_ROOT/Resources/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+          export GSETTINGS_SCHEMA_DIR="$APP_ROOT/Resources/share/glib-2.0/schemas"
+          exec "$APP_ROOT/MacOS/NeoSzyszka-bin" "$@"
+          SH
+          chmod +x "$MACOS_DIR/NeoSzyszka" "$MACOS_DIR/NeoSzyszka-bin"
+
+          # Bundle non-system dylibs and rewrite their install names to the app Frameworks directory.
+          dylibbundler -od -b \
+            -x "$MACOS_DIR/NeoSzyszka-bin" \
+            -d "$FRAMEWORKS_DIR" \
+            -p '@executable_path/../Frameworks/'
+
+          # libadwaita and GTK need runtime data in addition to dylibs.
+          mkdir -p "$RESOURCES_DIR/share"
+          for directory in \
+            "$(brew --prefix glib)/share/glib-2.0" \
+            "$(brew --prefix gtk4)/share/gtk-4.0" \
+            "$(brew --prefix libadwaita)/share/libadwaita-1" \
+            "$(brew --prefix adwaita-icon-theme)/share/icons"; do
+              if [ -d "$directory" ]; then
+                cp -R "$directory" "$RESOURCES_DIR/share/"
+              fi
+            done
+          glib-compile-schemas "$RESOURCES_DIR/share/glib-2.0/schemas"
+
+          # Ad-hoc signing makes the bundle internally consistent. Distribution signing and notarization
+          # can later be added with Apple Developer credentials without changing the package layout.
+          codesign --force --deep --sign - "$APP_ROOT"
+          codesign --verify --deep --strict "$APP_ROOT"
+
+          DMG_PATH="$PWD/dist/szyszka-${VERSION}-macos-${ARCH}.dmg"
+          hdiutil create -volname "NeoSzyszka" -srcfolder "$APP_ROOT" -ov -format UDZO "$DMG_PATH"
+          test -s "$DMG_PATH"
+          ls -lh "$DMG_PATH"
+      - name: Upload macOS application image
         uses: actions/upload-artifact@v6
         with:
-          name: szyszka-macos
-          path: mac_szyszka
+          name: szyszka-${{ needs.metadata.outputs.version }}-macos-${{ matrix.arch }}
+          path: dist/szyszka-${{ needs.metadata.outputs.version }}-macos-${{ matrix.arch }}.dmg
+          if-no-files-found: error
+          compression-level: 0
 
   release:
-    name: 🚀 Publish to GitHub Release
-    needs: [flatpak, windows, macos]
-    runs-on: ubuntu-latest
+    name: Publish GitHub release
+    needs: [metadata, flatpak, windows, macos]
+    if: needs.metadata.outputs.is_release == 'true'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Download all artifacts
+      - name: Download all release packages
         uses: actions/download-artifact@v6
         with:
           path: artifacts
-
-      - name: Generate release notes
+      - name: Generate release notes from AppStream metadata
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
         run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          python3 -c "
+          python3 - <<'PY' > /tmp/release-notes.md
+          import os
           import xml.etree.ElementTree as ET
-          tree = ET.parse('data/com.github.samfic.szyszka.metainfo.xml')
-          root = tree.getroot()
-          for release in root.findall('.//release'):
-              if release.get('version') == '$VERSION':
-                  desc = release.find('description')
-                  if desc is not None:
-                      parts = []
-                      for p in desc.findall('.//p'):
-                          if p.text:
-                              parts.append(p.text.strip())
-                      for li in desc.findall('.//li'):
-                          if li.text:
-                              parts.append('- ' + li.text.strip())
-                      print('\n'.join(parts))
+
+          version = os.environ["VERSION"]
+          root = ET.parse("data/com.github.samfic.szyszka.metainfo.xml").getroot()
+          for release in root.findall(".//release"):
+              if release.get("version") != version:
+                  continue
+              description = release.find("description")
+              if description is None:
                   break
-          " > /tmp/release-notes.md
-          # Fallback if no notes found
+              parts = []
+              for paragraph in description.findall(".//p"):
+                  text = "".join(paragraph.itertext()).strip()
+                  if text:
+                      parts.append(text)
+              for item in description.findall(".//li"):
+                  text = "".join(item.itertext()).strip()
+                  if text:
+                      parts.append(f"- {text}")
+              print("\n".join(parts))
+              break
+          PY
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "Release v${VERSION}" > /tmp/release-notes.md
+            printf 'Release v%s\n' "$VERSION" > /tmp/release-notes.md
           fi
           cat /tmp/release-notes.md
-
-      - name: Create GitHub Release
+      - name: Create or update GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          name: NeoSzyszka v${{ needs.metadata.outputs.version }}
           body_path: /tmp/release-notes.md
+          files: artifacts/**/*
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
         env:

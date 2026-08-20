@@ -4,7 +4,10 @@
 
 > 本文档供 AI 编程助手在协助构建和发布版本时参考。
 >
-> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成——推送 `v*` tag 后，CI 并行构建三平台产物（Flatpak / Windows / macOS），并自动创建 GitHub Release 上传全部安装包。
+> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成。推送 `v*` tag 后，CI 将并行构建并上传以下产物：Linux `szyszka-X.Y.Z.flatpak`、Windows `szyszka-X.Y.Z-windows-x86_64.zip`、Intel macOS `szyszka-X.Y.Z-macos-x86_64.dmg` 与 Apple Silicon macOS `szyszka-X.Y.Z-macos-aarch64.dmg`。Windows ZIP 含 GTK/libadwaita 运行时，macOS DMG 含 `.app` 与所需动态库；后者为临时签名，尚未经过 Apple Developer ID 签名或公证。
+>
+> 从 Actions 页面手动运行 `Release packages` 时，CI 会生成带 `snapshot-<commit>` 版本号的相同平台产物作为工作流 artifact，但**不会**创建 GitHub Release。此模式适合在打 tag 前验证打包流程。
+>
 > 因此 **AI 在本地只负责「版本元数据」与「提交 + 打 tag + 推送」**，不要本地执行 flatpak 构建，也不要手动 `gh release create`（会重复创建或与 CI 冲突）。构建与发布一律交给 CI。
 >
 > **AI 应自动完成**：确定 changelog → 更新 `Cargo.toml` / `Cargo.lock` / `metainfo.xml` → commit → tag → push。无需用户手动执行任何步骤。
@@ -66,10 +69,10 @@ git log v4.0.0..HEAD --stat --name-only
 
 需要修改 **3 个文件**：
 
-| 文件 | 修改内容 |
-| --- | --- |
-| `Cargo.toml` | 第 5 行 `version = "x.y.z"`（此为唯一版本源） |
-| `Cargo.lock` | 运行 `cargo check` 自动更新 |
+| 文件                                          | 修改内容                                                                                                    |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Cargo.toml`                                  | 第 5 行 `version = "x.y.z"`（此为唯一版本源）                                                               |
+| `Cargo.lock`                                  | 运行 `cargo check` 自动更新                                                                                 |
 | `data/com.github.samfic.szyszka.metainfo.xml` | 在 `<releases>` 内新增 `<release>` 条目，按版本号**从新到旧**排列，`date` 使用当天日期（格式 `YYYY-MM-DD`） |
 
 `metainfo.xml` 新增条目的格式示例：
@@ -201,6 +204,7 @@ data/
 1. **`szyszka`**：主应用，使用 `type: dir` 指向本地源码 + vendored Cargo 依赖
 
 构建流程：
+
 - `cargo vendor` 将所有 crate 下载到 `vendor/` 目录
 - `.cargo/config.toml`（inline source）告诉 cargo 使用 vendored 依赖
 - `cargo --offline build --release` 离线编译
@@ -221,10 +225,10 @@ data/
 ### 4.2 权限（finish-args）
 
 ```yaml
-- --share=ipc          # 进程间通信（X11 需要）
+- --share=ipc # 进程间通信（X11 需要）
 - --socket=fallback-x11 # X11 回退
-- --socket=wayland     # Wayland 显示协议
-- --device=dri         # GPU 硬件加速
+- --socket=wayland # Wayland 显示协议
+- --device=dri # GPU 硬件加速
 ```
 
 > 注意：NeoSzyszka 不需要 `--filesystem=host`，因为用户通过 GTK 文件选择器添加文件，不需要直接访问文件系统。
@@ -340,7 +344,7 @@ rm -rf build-dir/ flatpak-repo/ .flatpak-builder/ vendor/
 #    && git commit -m "release: vX.Y.Z" && git tag vX.Y.Z && git push && git push origin vX.Y.Z
 #    → 推送 v* tag 即触发 release.yml：自动三平台构建 + 创建 GitHub Release 上传全部安装包
 # 6. 等待 CI 完成，用 gh run list --workflow release.yml 跟踪，确认三个产物
-#    （.flatpak / .exe / macOS 二进制）均已出现在 GitHub Release
+#    （.flatpak / Windows ZIP / Intel 与 Apple Silicon macOS DMG）均已出现在 GitHub Release
 ```
 
 > 💡 第 2 步是重点：自动生成的 commit 列表只是**草稿**，AI 必须二次润色成符合上式的流畅双语日志，再写入 metainfo。release.yml 会从该条目提取 notes，因此 metainfo 里的日志即最终对外发布文案。
