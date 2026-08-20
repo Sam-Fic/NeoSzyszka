@@ -2,7 +2,7 @@
 
 [package]
 name = "szyszka"
-version = "4.0.0"
+version = "4.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>", "Sam-Fic <samfic@foxmail.com>"]
 edition = "2021"
 description = "Fast, powerful and easy to use file renamer (GTK/Adwaita port)"

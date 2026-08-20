@@ -20,6 +20,19 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="4.1.0" date="2026-08-21">
+      <description>
+        <p>New features, stability improvements, and cross-platform distribution:</p>
+        <ul>
+          <li>Cross-platform packages: automatically publish a Linux Flatpak, Windows portable package, and macOS disk images for Intel and Apple Silicon (跨平台安装包：自动发布 Linux Flatpak、Windows 便携包，以及 Intel 和 Apple Silicon macOS 磁盘镜像)</li>
+          <li>GNOME visual consistency: bundle the complete Adwaita icon theme and hicolor fallback theme on Windows and macOS, so symbolic icons match the GNOME experience (GNOME 视觉一致性：Windows 和 macOS 随包提供完整 Adwaita 图标主题及 hicolor 回退主题，符号图标与 GNOME 保持一致)</li>
+          <li>Native application icons: add multi-resolution Windows executable and package icons plus macOS Finder and Dock icons (原生应用图标：新增多分辨率 Windows 可执行文件与安装包图标，以及 macOS Finder 和 Dock 图标)</li>
+          <li>Rule editing: edit existing rules directly and receive clear feedback when no rule is selected (规则编辑：可直接编辑已有规则，未选择规则时提供清晰提示)</li>
+          <li>Safer batch renaming: use an inline progress indicator and prevent duplicate rename operations (更安全的批量重命名：采用内联进度指示，并防止重复执行重命名操作)</li>
+          <li>Localization and list behavior: improve translations and make file and rule reordering reliable (本地化与列表行为：改进翻译，并使文件和规则的重新排序更加可靠)</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.0.0" date="2026-07-10">
       <description>
         <p>First release of this fork, rebuilt on GTK 4 and libadwaita:</p>
