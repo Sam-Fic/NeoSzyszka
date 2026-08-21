@@ -4,14 +4,14 @@ upper_add_files_button = ファイルを追加
 upper_add_folders_button = フォルダを追加
 upper_remove_selection_button = 選択範囲を削除
 upper_update_names_button = 名前を更新
-upper_results_one_up_button = One Up
+upper_results_one_up_button = 1つ上へ
 upper_results_one_down_button = ワンダウン
 upper_select_popup_button = 選択
 # Bottom Buttons
 bottom_rule_add_button = ルールを追加
 bottom_rule_edit_button = ルールの編集
 bottom_rule_remove_button = ルールを削除
-bottom_rule_one_up_button = One Up
+bottom_rule_one_up_button = 1つ上へ
 bottom_rule_one_down_button = ワンダウン
 bottom_rule_save_rules_button = ルールを保存
 bottom_rule_load_rules_button = ルールを読み込む
@@ -46,12 +46,12 @@ button_unselect_all = すべて選択解除
 button_select_changed = 変更を選択
 button_unselect_changed = 選択解除の変更
 # Un/Select custom
-select_custom_example = 使用法: */folder-nr*/* または name-version-*.txt
+select_custom_example = 使用法: */フォルダ-番号*/* または 名前-バージョン-*.txt
 select_custom_path = パス
 select_custom_current_path = 現在のパス
 select_custom_future_path = 将来のパス
 select_custom_path_current_name = パス + 現在の名前
-select_custom_path_future_name = Path + Future Name
+select_custom_path_future_name = パス + 変更後の名前
 select_custom_directory_file = ディレクトリ/ファイル
 select_custom_select_directory = ディレクトリを選択
 select_custom_unselect_directory = ディレクトリの選択を解除
@@ -115,7 +115,7 @@ label_add_number_settings = 番号の設定:
 check_button_add_number_before_name = 名前の前
 check_button_add_number_after_name = 名前の後
 label_number_start_number = 開始番号
-label_number_step = Step
+label_number_step = ステップ
 label_number_fill_zeros = ゼロで塗りつぶし
 # Add text
 check_button_add_text_before_name = 名前の前
@@ -134,7 +134,7 @@ label_replace_text_to_find = 検索するテキスト
 label_replace_text_to_replace = 置換されたテキスト
 label_replace_captures = キャプチャ
 label_replace_captured_captures = キャプチャされたキャプチャ
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } 個のキャプチャ)
 label_replace_no_captures = キャプチャなし
 label_replace_invalid_regex = 無効な正規表現があります
 # Trim
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = 大文字小文字を区別しない
 label_trim_trim_text = テキストをトリムする
 label_trim_case_sensitivity = ケース感度
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = すべて — 名前を `a-z`、`0-9`、`-`、空白、`.` のみで構成される形式に変更します。
+                       例: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       部分的 — 上記と同じように動作しますが、空白と大文字 `A-Z` を使用できます。
+                       例: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = すべて
 check_button_normalize_partial = 部分的な
 # RuleType
 rule_type_custom = カスタム
 rule_type_case_size = 案件サイズ
-rule_type_purge = Purge
+rule_type_purge = 削除
 rule_type_add_text = テキストを追加
 rule_type_trim = 切り落とし
 rule_type_replace = 置換
@@ -191,7 +195,7 @@ rule_description_replace = { $additional_regex_text } "{ $text_to_find }" を "{
 # Notebooks
 notebook_tab_custom = カスタム
 notebook_tab_case_size = 上位/下位ケース
-notebook_tab_purge = Purge
+notebook_tab_purge = 削除
 notebook_tab_add_number = 番号を追加
 notebook_tab_add_text = テキストを追加
 notebook_tab_replace = 置換

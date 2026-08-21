@@ -47,7 +47,7 @@ button_select_custom = Własne zaznaczanie / odznaczanie
 button_select_changed = Wybierz zmienione
 button_unselect_changed = Odznacz zmienione
 # Un/Select custom
-select_custom_example = Składnia: */folder-nr*/* lub name-version-*.txt
+select_custom_example = Składnia: */katalog-nr*/* lub nazwa-wersja-*.txt
 select_custom_path = Ścieżka
 select_custom_current_path = Bieżąca ścieżka
 select_custom_future_path = Przyszła ścieżka
@@ -57,7 +57,7 @@ select_custom_directory_file = Katalog/Plik
 select_custom_select_directory = Wybierz katalog
 select_custom_unselect_directory = Odznacz katalog
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Anuluj
 # Dialogs
 dialog_name_files_to_include = Pliki do dodania
@@ -181,7 +181,7 @@ rule_description_lowercase = Małe litery
 rule_description_uppercase = Wielkie litery
 rule_description_text = tekst
 rule_description_added_text = Dodany tekst:
-rule_description_start = start
+rule_description_start = początek
 rule_description_end_of_name = koniec nazwy
 rule_description_extension = rozszerzenie
 rule_description_end_of_extension = koniec rozszerzenia
@@ -293,7 +293,7 @@ select_custom_hint = Gdy tryb Katalog/Plik jest aktywny, wzorzec jest ignorowany
 settings_theme = Motyw
 settings_theme_dark = Ciemny
 settings_theme_light = Jasny
-settings_theme_system = System
+settings_theme_system = Systemowy
 sort_by = Sortuj według
 sort_descending = Malejąco
 sort_future_name = Nowa nazwa

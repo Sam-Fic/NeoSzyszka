@@ -36,7 +36,7 @@ check_button_dark_theme = Dunkle Symbole
 # Other in main window
 bottom_rule_label_rules = Regeln
 upper_files_folders_label = Dateien/Ordner
-upper_files_folders_label_update = Files/Folders({ $files_number }) - ##### UPDATE ANFRAGEN #####
+upper_files_folders_label_update = Dateien/Ordner ({ $files_number }) – AKTUALISIERUNG ERFORDERLICH
 upper_files_folders_label_up_to_date = Dateien/Ordner ({ $files_number }) - Aktuell
 # Select popover
 button_select_all = Alle auswählen
@@ -46,7 +46,7 @@ button_unselect_all = Alle abwählen
 button_select_changed = Geändert auswählen
 button_unselect_changed = Auswahl abwählen
 # Un/Select custom
-select_custom_example = Verwendung: */folder-nr*/* oder name-version-*.txt
+select_custom_example = Verwendung: */ordner-nr*/* oder name-version-*.txt
 select_custom_path = Pfad
 select_custom_current_path = Aktueller Pfad
 select_custom_future_path = Zukünftige Pfad
@@ -56,7 +56,7 @@ select_custom_directory_file = Verzeichnis/Datei
 select_custom_select_directory = Verzeichnis auswählen
 select_custom_unselect_directory = Verzeichnis deaktivieren
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Abbrechen
 # Dialogs
 dialog_name_files_to_include = Dateien zum Einbinden
@@ -76,7 +76,7 @@ settings_open_log_folder = Log-Ordner öffnen
 ## Common
 
 label_usage_type = Verwendungstyp:
-label_example = EXAMPLE
+label_example = BEISPIEL
 label_example_text_before = Vor:
 label_example_text_after = Nach:
 button_rule_window_add = Regel hinzufügen
@@ -134,11 +134,11 @@ label_replace_text_to_find = Zu findende Text
 label_replace_text_to_replace = Ersetzter Text
 label_replace_captures = Aufnahmen
 label_replace_captured_captures = Erfasste Aufnahmen
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } Erfassungsgruppen)
 label_replace_no_captures = Keine Aufnahmen
 label_replace_invalid_regex = UNGÜLTIGE REGEX
 # Trim
-check_button_trim_name_start = Name Start
+check_button_trim_name_start = Namensanfang
 check_button_trim_name_end = Name Ende
 check_button_trim_extension_start = Erweiterungs-Start
 check_button_trim_extension_end = Ende der Erweiterung
@@ -147,20 +147,24 @@ check_button_trim_case_insensitive = Groß-/Kleinschreibung
 label_trim_trim_text = Text kürzen
 label_trim_case_sensitivity = Groß-/Kleinschreibung
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Alles – benennt den Namen so um, dass er nur die Zeichen `a-z`, `0-9`, `-`, Leerzeichen und `.` enthält.
+                       Beispiel: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Teilweise – funktioniert wie die obige Option, erlaubt aber Leerzeichen und Großbuchstaben `A-Z`.
+                       Beispiel: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Alles
 check_button_normalize_partial = Teilweise
 # RuleType
 rule_type_custom = Eigene
 rule_type_case_size = Fallgröße
-rule_type_purge = Purge
+rule_type_purge = Bereinigen
 rule_type_add_text = Neuer Text
 rule_type_trim = Trimmen
 rule_type_replace = Ersetzen
 rule_type_add_number = Nummer hinzufügen
 rule_type_normalize = Normalisieren
 # RulePlace
-rule_place_none = N/A
+rule_place_none = Nicht zutreffend
 rule_place_extension = Nur Erweiterung
 rule_place_name = Nur Name
 rule_place_extension_name = Erweiterung und Name
@@ -191,7 +195,7 @@ rule_description_replace = Ersetze { $additional_regex_text } "{ $text_to_find }
 # Notebooks
 notebook_tab_custom = Eigene
 notebook_tab_case_size = Ober-/Untere Fälle
-notebook_tab_purge = Purge
+notebook_tab_purge = Bereinigen
 notebook_tab_add_number = Nummer hinzufügen
 notebook_tab_add_text = Neuer Text
 notebook_tab_replace = Ersetzen
@@ -290,10 +294,10 @@ rule_editor_tool_type = Werkzeugtyp:
 rule_editor_usage_type = Verwendungstyp:
 rule_no_selection = Keine Regel ausgewählt. Wähle eine Regel zum Bearbeiten.
 select_custom_hint = Wenn der Verzeichnis-/Datei-Modus aktiv ist, wird das Muster ignoriert.
-settings_theme = Theme
+settings_theme = Erscheinungsbild
 settings_theme_dark = Dunkel
 settings_theme_light = Hell
-settings_theme_system = System
+settings_theme_system = Systemstandard
 sort_by = Sortieren nach
 sort_descending = Absteigend
 sort_future_name = Neuer Name

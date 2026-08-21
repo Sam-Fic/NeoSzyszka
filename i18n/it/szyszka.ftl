@@ -36,7 +36,7 @@ check_button_dark_theme = Icone scure
 # Other in main window
 bottom_rule_label_rules = Regole
 upper_files_folders_label = File/Cartelle
-upper_files_folders_label_update = File/Cartelle({ $files_number }) - ##### UPDATE REQUISITI #####
+upper_files_folders_label_update = File/Cartelle ({ $files_number }) – AGGIORNAMENTO RICHIESTO
 upper_files_folders_label_up_to_date = File/Cartelle({ $files_number }) - aggiornato
 # Select popover
 button_select_all = Seleziona Tutto
@@ -46,7 +46,7 @@ button_unselect_all = Deseleziona tutto
 button_select_changed = Seleziona Modificato
 button_unselect_changed = Deseleziona Modificato
 # Un/Select custom
-select_custom_example = Uso: */folder-nr*/* o name-version-*.txt
+select_custom_example = Uso: */cartella-n.*/* o nome-versione-*.txt
 select_custom_path = Percorso
 select_custom_current_path = Percorso Corrente
 select_custom_future_path = Percorso Futuro
@@ -56,7 +56,7 @@ select_custom_directory_file = Cartella/File
 select_custom_select_directory = Seleziona Cartella
 select_custom_unselect_directory = Deseleziona Cartella
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Annulla
 # Dialogs
 dialog_name_files_to_include = File da includere
@@ -134,7 +134,7 @@ label_replace_text_to_find = Testo da trovare
 label_replace_text_to_replace = Testo sostituito
 label_replace_captures = Catture
 label_replace_captured_captures = Catture catturate
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } gruppi acquisiti)
 label_replace_no_captures = Nessuna cattura
 label_replace_invalid_regex = REGEX INVALIDO
 # Trim
@@ -147,20 +147,24 @@ check_button_trim_case_insensitive = Distingui Maiuscole
 label_trim_trim_text = Taglia testo
 label_trim_case_sensitivity = Sensibilità Caso
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Tutto – rinomina il nome in modo che contenga soltanto i caratteri `a-z`, `0-9`, `-`, lo spazio e `.`.
+                       Esempio: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Parziale – funziona come l’opzione precedente, ma consente gli spazi e le lettere maiuscole `A-Z`.
+                       Esempio: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Tutto
 check_button_normalize_partial = Parziale
 # RuleType
 rule_type_custom = Personalizzato
 rule_type_case_size = Dimensione Caso
-rule_type_purge = Purge
+rule_type_purge = Elimina
 rule_type_add_text = Aggiungi Testo
 rule_type_trim = Taglia
 rule_type_replace = Sostituisci
 rule_type_add_number = Aggiungi Numero
 rule_type_normalize = Normalizza
 # RulePlace
-rule_place_none = N/A
+rule_place_none = Non applicabile
 rule_place_extension = Solo Estensione
 rule_place_name = Solo Nome
 rule_place_extension_name = Estensione e nome
@@ -191,7 +195,7 @@ rule_description_replace = Sostituzione { $additional_regex_text } "{ $text_to_f
 # Notebooks
 notebook_tab_custom = Personalizzato
 notebook_tab_case_size = Casi Superiori/Minori
-notebook_tab_purge = Purge
+notebook_tab_purge = Elimina
 notebook_tab_add_number = Aggiungi Numero
 notebook_tab_add_text = Aggiungi Testo
 notebook_tab_replace = Sostituisci
@@ -257,7 +261,7 @@ dialog_select_custom_body = Utilizzo: */cartella*/* o nome-versione-*.txt
 dialog_select_custom_hint = Quando la modalità Directory/File è attiva, il pattern viene ignorato.
 dialog_select_custom_include_dirs = Includi directory
 dialog_select_custom_match = Corrispondenza con:
-dialog_select_custom_pattern = Pattern
+dialog_select_custom_pattern = Schema
 dialog_select_custom_title = Seleziona / Deseleziona personalizzato
 empty_state_files_description = Aggiungi file o cartelle per iniziare a rinominare
 empty_state_files_title = Nessun file caricato

@@ -36,7 +36,7 @@ check_button_dark_theme = Темні іконки
 # Other in main window
 bottom_rule_label_rules = Правила
 upper_files_folders_label = Файли/Теки
-upper_files_folders_label_update = Файли/Папки({ $files_number }) - ### # UPDATE REQUIRED #####
+upper_files_folders_label_update = Файли/Папки ({ $files_number }) – ПОТРІБНЕ ОНОВЛЕННЯ
 upper_files_folders_label_up_to_date = Файли/Папки({ $files_number }) - З найновішою
 # Select popover
 button_select_all = Виділити все
@@ -46,7 +46,7 @@ button_unselect_all = Зняти виділення з усього
 button_select_changed = Виберіть змінені
 button_unselect_changed = Зняти виділення зі змін
 # Un/Select custom
-select_custom_example = Використання: */folder-nr*/* або name-version-*.txt
+select_custom_example = Використання: */папка-номер*/* або назва-версія-*.txt
 select_custom_path = Шлях
 select_custom_current_path = Поточний шлях
 select_custom_future_path = Шлях в майбутньому
@@ -134,9 +134,9 @@ label_replace_text_to_find = Текст для пошуку
 label_replace_text_to_replace = Замінений текст
 label_replace_captures = Знайдено
 label_replace_captured_captures = Захоплені боротьби
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } груп захоплення)
 label_replace_no_captures = Немає зловживань
-label_replace_invalid_regex = НЕВІРНИЙ ПЕРЕГЛЯД
+label_replace_invalid_regex = НЕПРАВИЛЬНИЙ РЕГУЛЯРНИЙ ВИРАЗ
 # Trim
 check_button_trim_name_start = Назвати Початок
 check_button_trim_name_end = Назвати кінець
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = Без урахування регістр�
 label_trim_trim_text = Обрізати текст
 label_trim_case_sensitivity = Чутливість до регістру
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Усе — перейменовує назву так, щоб вона містила лише символи `a-z`, `0-9`, `-`, пробіл і `.`.
+                       Приклад: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Частково — працює так само, але дозволяє пробіли й великі літери `A-Z`.
+                       Приклад: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Все
-check_button_normalize_partial = Частково оплачено
+check_button_normalize_partial = Частково
 # RuleType
 rule_type_custom = Користувацька
 rule_type_case_size = Розмір звернення
-rule_type_purge = Purge
+rule_type_purge = Очистити
 rule_type_add_text = Додати текст
 rule_type_trim = Обрізати
 rule_type_replace = Заміняти
@@ -191,7 +195,7 @@ rule_description_replace = Заміна { $additional_regex_text } "{ $text_to_f
 # Notebooks
 notebook_tab_custom = Користувацька
 notebook_tab_case_size = Верхній/Нижні кейси
-notebook_tab_purge = Purge
+notebook_tab_purge = Очистити
 notebook_tab_add_number = Додати номер
 notebook_tab_add_text = Додати текст
 notebook_tab_replace = Заміняти

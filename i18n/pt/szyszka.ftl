@@ -46,7 +46,7 @@ button_unselect_all = Desmarcar todos
 button_select_changed = Selecionar Alterado
 button_unselect_changed = Desmarcar Alterado
 # Un/Select custom
-select_custom_example = Uso: */folder-nr*/* ou nome-versão-*.txt
+select_custom_example = Uso: */pasta-nº*/* ou nome-versão-*.txt
 select_custom_path = Caminho
 select_custom_current_path = Caminho Atual
 select_custom_future_path = Caminho futuro
@@ -134,7 +134,7 @@ label_replace_text_to_find = Texto para encontrar
 label_replace_text_to_replace = Texto substituído
 label_replace_captures = Capturas
 label_replace_captured_captures = Capturas capturadas
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } grupos capturados)
 label_replace_no_captures = Sem capturas
 label_replace_invalid_regex = REGEX INVÁLIDO
 # Trim
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = Insensível ao caso
 label_trim_trim_text = Recortar texto
 label_trim_case_sensitivity = Sensibilidade do Caso
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Tudo — renomeia o nome para que contenha apenas os caracteres `a-z`, `0-9`, `-`, espaço e `.`.
+                       Exemplo: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Parcial — funciona como a opção acima, mas permite espaços e letras maiúsculas `A-Z`.
+                       Exemplo: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Tudo
 check_button_normalize_partial = Parcial
 # RuleType
 rule_type_custom = Personalizado
 rule_type_case_size = Tamanho do Caso
-rule_type_purge = Purge
+rule_type_purge = Remover
 rule_type_add_text = Adicionar Texto
 rule_type_trim = Recortar
 rule_type_replace = Substituir
@@ -191,7 +195,7 @@ rule_description_replace = Substituindo { $additional_regex_text } "{ $text_to_f
 # Notebooks
 notebook_tab_custom = Personalizado
 notebook_tab_case_size = Casos Superiores/Minúsculos
-notebook_tab_purge = Purge
+notebook_tab_purge = Remover
 notebook_tab_add_number = Adicionar Número
 notebook_tab_add_text = Adicionar Texto
 notebook_tab_replace = Substituir

@@ -46,7 +46,7 @@ button_unselect_all = إلغاء تحديد الكل
 button_select_changed = حدد التغيير
 button_unselect_changed = غير محدد
 # Un/Select custom
-select_custom_example = الاستخدام: */folder-nr*/* أو name-version *.txt
+select_custom_example = الاستخدام: */مجلد-رقم*/* أو اسم-إصدار-*.txt
 select_custom_path = المسار
 select_custom_current_path = المسار الحالي
 select_custom_future_path = المسار المستقبلي
@@ -134,9 +134,9 @@ label_replace_text_to_find = النص للبحث عنه
 label_replace_text_to_replace = استبدال النص
 label_replace_captures = التقاط
 label_replace_captured_captures = التقاط مأسور
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } مجموعات ملتقطة)
 label_replace_no_captures = لا يوجد التقاط
-label_replace_invalid_regex = INVALID REGEX
+label_replace_invalid_regex = تعبير نمطي غير صالح
 # Trim
 check_button_trim_name_start = إسم البداية
 check_button_trim_name_end = نهاية الاسم
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = حالة غير حساسة
 label_trim_trim_text = تقليم النص
 label_trim_case_sensitivity = حساسية الحالة
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = "الكل" — يعيد تسمية الاسم بحيث لا يحتوي إلا على الأحرف `a-z` والأرقام `0-9` و`-` والمسافة و`.`.
+                       مثال: `żółć CZERona.Txt` ← `zolc-czerwona.txt`
+
+                       "جزئي" — يعمل بالطريقة نفسها، لكنه يسمح بالمسافات والأحرف الكبيرة `A-Z`.
+                       مثال: ` Źrebię Krokietowe.Rar ` ← `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = كل شيء
 check_button_normalize_partial = جزئي
 # RuleType
 rule_type_custom = مخصص
 rule_type_case_size = حجم الحالة
-rule_type_purge = Purge
+rule_type_purge = تنظيف
 rule_type_add_text = إضافة نص
 rule_type_trim = تقليم
 rule_type_replace = استبدل
@@ -191,7 +195,7 @@ rule_description_replace = استبدال { $additional_regex_text } "{ $text_to
 # Notebooks
 notebook_tab_custom = مخصص
 notebook_tab_case_size = الحالات العليا/السفلى
-notebook_tab_purge = Purge
+notebook_tab_purge = تنظيف
 notebook_tab_add_number = إضافة رقم
 notebook_tab_add_text = إضافة نص
 notebook_tab_replace = استبدل

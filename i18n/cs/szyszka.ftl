@@ -26,7 +26,7 @@ tree_view_upper_column_path = Cesta
 # Tree View Results
 tree_view_bottom_tool_type = Typ nástroje
 tree_view_bottom_usage_name = Název použití
-tree_view_bottom_description = L 343, 22.12.2009, s. 1).
+tree_view_bottom_description = Popis
 # Settings
 settings_language_label = Jazyk
 settings_open_rules = Otevřít soubor s nastavením pravidel
@@ -46,7 +46,7 @@ button_unselect_all = Zrušit výběr vše
 button_select_changed = Vybrat změněné
 button_unselect_changed = Zrušit výběr změněn
 # Un/Select custom
-select_custom_example = Použití: */folder-nr*/* nebo name-version-*.txt
+select_custom_example = Použití: */složka-číslo*/* nebo název-verze-*.txt
 select_custom_path = Cesta
 select_custom_current_path = Aktuální cesta
 select_custom_future_path = Budoucí cesta
@@ -56,7 +56,7 @@ select_custom_directory_file = Adresář/soubor
 select_custom_select_directory = Vybrat adresář
 select_custom_unselect_directory = Zrušit výběr adresáře
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Zrušit
 # Dialogs
 dialog_name_files_to_include = Soubory, které chcete zahrnout
@@ -77,7 +77,7 @@ settings_open_log_folder = Otevřít složku logů
 
 label_usage_type = Typ použití:
 label_example = PŘÍKLAD
-label_example_text_before = Rychlo:
+label_example_text_before = Před:
 label_example_text_after = Poté
 button_rule_window_add = Přidat pravidlo
 
@@ -134,7 +134,7 @@ label_replace_text_to_find = Text k nalezení
 label_replace_text_to_replace = Nahrazený text
 label_replace_captures = Zachytávání
 label_replace_captured_captures = Zajaté snímky
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } zachycené skupiny)
 label_replace_no_captures = Žádné snímky
 label_replace_invalid_regex = NEPLATNÝ REGEX
 # Trim
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = Rozlišovat velikost písmen
 label_trim_trim_text = Oříznout text
 label_trim_case_sensitivity = Citlivost případu
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Vše — přejmenuje název tak, aby obsahoval pouze znaky `a-z`, `0-9`, `-`, mezeru a `.`.
+                       Např. `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Částečně — funguje stejně jako možnost výše, ale povoluje mezery a velká písmena `A-Z`.
+                       Např. ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Vše
 check_button_normalize_partial = Částečné
 # RuleType
 rule_type_custom = Vlastní
 rule_type_case_size = Velikost písmen
-rule_type_purge = Purge
+rule_type_purge = Vyčistit
 rule_type_add_text = Přidat text
 rule_type_trim = Oříznout
 rule_type_replace = Nahradit
@@ -191,7 +195,7 @@ rule_description_replace = Nahrazeno { $additional_regex_text } "{ $text_to_find
 # Notebooks
 notebook_tab_custom = Vlastní
 notebook_tab_case_size = Horní/dolní bedny
-notebook_tab_purge = Purge
+notebook_tab_purge = Vyčistit
 notebook_tab_add_number = Přidat číslo
 notebook_tab_add_text = Přidat text
 notebook_tab_replace = Nahradit

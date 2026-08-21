@@ -46,7 +46,7 @@ button_unselect_all = Avmarkera alla
 button_select_changed = Välj Ändrad
 button_unselect_changed = Avmarkera ändrad
 # Un/Select custom
-select_custom_example = Användning: */folder-nr*/* eller namn-version-*.txt
+select_custom_example = Användning: */mapp-nr*/* eller namn-version-*.txt
 select_custom_path = Sökväg
 select_custom_current_path = Nuvarande sökväg
 select_custom_future_path = Framtida sökväg
@@ -134,9 +134,9 @@ label_replace_text_to_find = Text att hitta
 label_replace_text_to_replace = Ersatt text
 label_replace_captures = Fånga
 label_replace_captured_captures = Fångade fångar
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } fångstgrupper)
 label_replace_no_captures = Inga bilder
-label_replace_invalid_regex = INVALID REGEX
+label_replace_invalid_regex = OGILTIGT REGULJÄRT UTTRYCK
 # Trim
 check_button_trim_name_start = Start för namn
 check_button_trim_name_end = Namn Slut
@@ -147,20 +147,24 @@ check_button_trim_case_insensitive = Ärendet okänslig
 label_trim_trim_text = Trimma text
 label_trim_case_sensitivity = Ärendets känslighet
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Allt – byter namn så att namnet endast innehåller tecknen `a-z`, `0-9`, `-`, blanksteg och `.`.
+                       Exempel: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Delvis – fungerar som alternativet ovan men tillåter blanksteg och versaler `A-Z`.
+                       Exempel: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Allt
 check_button_normalize_partial = Delvis
 # RuleType
 rule_type_custom = Anpassad
 rule_type_case_size = Storlek på ärende
-rule_type_purge = Purge
+rule_type_purge = Rensa
 rule_type_add_text = Lägg till text
 rule_type_trim = Beskär
 rule_type_replace = Ersätt
 rule_type_add_number = Lägg till nummer
 rule_type_normalize = Normalisera
 # RulePlace
-rule_place_none = N/A
+rule_place_none = Ej tillämpligt
 rule_place_extension = Endast tillägg
 rule_place_name = Endast namn
 rule_place_extension_name = Tillägg och namn
@@ -181,7 +185,7 @@ rule_description_lowercase = Gemener
 rule_description_uppercase = Versaler
 rule_description_text = text
 rule_description_added_text = Lade till text:
-rule_description_start = start
+rule_description_start = början
 rule_description_end_of_name = slutet av namnet
 rule_description_extension = tillägg
 rule_description_end_of_extension = slut på förlängning
@@ -191,7 +195,7 @@ rule_description_replace = Ersätter { $additional_regex_text } "{ $text_to_find
 # Notebooks
 notebook_tab_custom = Anpassad
 notebook_tab_case_size = Övre/Lägre Fall
-notebook_tab_purge = Purge
+notebook_tab_purge = Rensa
 notebook_tab_add_number = Lägg till nummer
 notebook_tab_add_text = Lägg till text
 notebook_tab_replace = Ersätt
@@ -293,7 +297,7 @@ select_custom_hint = När Katalog/Fil-läget är aktivt ignoreras mönstret.
 settings_theme = Tema
 settings_theme_dark = Mörkt
 settings_theme_light = Ljust
-settings_theme_system = System
+settings_theme_system = Systemstandard
 sort_by = Sortera efter
 sort_descending = Fallande
 sort_future_name = Nytt namn

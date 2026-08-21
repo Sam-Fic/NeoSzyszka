@@ -46,7 +46,7 @@ button_unselect_all = Deseleccionar todo
 button_select_changed = Seleccionar cambiado
 button_unselect_changed = Deseleccionar cambiado
 # Un/Select custom
-select_custom_example = Uso: */folder-nr*/* o name-version-*.txt
+select_custom_example = Uso: */carpeta-n.º*/* o nombre-versión-*.txt
 select_custom_path = Ruta
 select_custom_current_path = Ruta actual
 select_custom_future_path = Ruta futura
@@ -56,7 +56,7 @@ select_custom_directory_file = Directorio/Archivo
 select_custom_select_directory = Seleccionar directorio
 select_custom_unselect_directory = Deseleccionar directorio
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Cancelar
 # Dialogs
 dialog_name_files_to_include = Archivos a incluir
@@ -76,8 +76,8 @@ settings_open_log_folder = Abrir carpeta de registros
 ## Common
 
 label_usage_type = Tipo de uso:
-label_example = EXAMPLE
-label_example_text_before = Before:
+label_example = EJEMPLO
+label_example_text_before = Antes:
 label_example_text_after = Después:
 button_rule_window_add = Regla Añadir
 
@@ -134,7 +134,7 @@ label_replace_text_to_find = Texto a encontrar
 label_replace_text_to_replace = Texto reemplazado
 label_replace_captures = Capturas
 label_replace_captured_captures = Capturar capturas
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } grupos capturados)
 label_replace_no_captures = No hay capturas
 label_replace_invalid_regex = REGEX INVÁLIDO
 # Trim
@@ -147,20 +147,24 @@ check_button_trim_case_insensitive = Insensible a mayúsculas
 label_trim_trim_text = Recortar texto
 label_trim_case_sensitivity = Sensibilidad de Caso
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Todo — cambia el nombre para que solo contenga los caracteres `a-z`, `0-9`, `-`, espacio y `.`.
+                       Ejemplo: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Parcial — funciona igual que la opción anterior, pero permite espacios y letras mayúsculas `A-Z`.
+                       Ejemplo: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Todo
 check_button_normalize_partial = Parcial
 # RuleType
 rule_type_custom = Personalizado
 rule_type_case_size = Tamaño del caso
-rule_type_purge = Purge
+rule_type_purge = Purgar
 rule_type_add_text = Añadir texto
 rule_type_trim = Recortar
 rule_type_replace = Reemplazar
 rule_type_add_number = Añadir número
 rule_type_normalize = Normalizar
 # RulePlace
-rule_place_none = N/A
+rule_place_none = No aplicable
 rule_place_extension = Sólo extensión
 rule_place_name = Sólo Nombre
 rule_place_extension_name = Extensión y nombre
@@ -191,7 +195,7 @@ rule_description_replace = Reemplazando { $additional_regex_text } "{ $text_to_f
 # Notebooks
 notebook_tab_custom = Personalizado
 notebook_tab_case_size = Casos superior/inferior
-notebook_tab_purge = Purge
+notebook_tab_purge = Purgar
 notebook_tab_add_number = Añadir número
 notebook_tab_add_text = Añadir texto
 notebook_tab_replace = Reemplazar
@@ -204,7 +208,7 @@ renaming_renamed_files = Archivos renombrados correctamente { $properly_renamed 
 renaming_ignored_files = Ignorados { $ignored } archivos, porque el nombre antes y después del cambio son los mismos.
 renaming_failed_files = Error al renombrar { $failed_vector } archivos
 renaming_list_of_failed_to_rename = Lista de todos los renombrados fallidos
-renaming_error = error
+renaming_error = Error
 renaming_some_records_not_updated = Algunos registros no se actualizan, puede hacerlo haciendo clic en el botón Actualizar nombres.\n¿Está seguro que desea continuar sin actualizar nombres?
 renaming_missing_files = Falta archivos
 renaming_require_missing_files = Necesitas usar al menos 1 archivo

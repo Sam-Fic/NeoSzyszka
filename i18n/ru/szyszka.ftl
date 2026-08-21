@@ -46,7 +46,7 @@ button_unselect_all = Снять выделение со всех
 button_select_changed = Выбрать измененные
 button_unselect_changed = Снять отметку с изменений
 # Un/Select custom
-select_custom_example = Использование: */folder-nr*/* или name-version-*.txt
+select_custom_example = Использование: */папка-номер*/* или имя-версия-*.txt
 select_custom_path = Путь
 select_custom_current_path = Текущий путь
 select_custom_future_path = Будущий путь
@@ -76,7 +76,7 @@ settings_open_log_folder = Открыть папку журналов
 ## Common
 
 label_usage_type = Тип использования:
-label_example = ИСПОЛЬЗОВАТЬ
+label_example = ПРИМЕР
 label_example_text_before = До:
 label_example_text_after = После:
 button_rule_window_add = Добавить правило
@@ -134,7 +134,7 @@ label_replace_text_to_find = Текст для поиска
 label_replace_text_to_replace = Заменный текст
 label_replace_captures = Захваты
 label_replace_captured_captures = Захваченные снимки
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } групп захвата)
 label_replace_no_captures = Нет снимков
 label_replace_invalid_regex = НЕВЕРНЫЙ РЕЖИМ
 # Trim
@@ -147,13 +147,17 @@ check_button_trim_case_insensitive = Без учета регистра
 label_trim_trim_text = Обрезать текст
 label_trim_case_sensitivity = Чувствительность к регистру
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Всё — переименовывает имя так, чтобы оно содержало только символы `a-z`, `0-9`, `-`, пробел и `.`.
+                       Пример: `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Частично — работает так же, но допускает пробелы и прописные буквы `A-Z`.
+                       Пример: ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Все
 check_button_normalize_partial = Частично
 # RuleType
 rule_type_custom = Свой
 rule_type_case_size = Размер заявки
-rule_type_purge = Purge
+rule_type_purge = Очистить
 rule_type_add_text = Добавить текст
 rule_type_trim = Обрезать
 rule_type_replace = Заменить
@@ -191,7 +195,7 @@ rule_description_replace = Замена { $additional_regex_text } "{ $text_to_f
 # Notebooks
 notebook_tab_custom = Свой
 notebook_tab_case_size = Верхний/нижний регистр
-notebook_tab_purge = Purge
+notebook_tab_purge = Очистить
 notebook_tab_add_number = Добавить номер
 notebook_tab_add_text = Добавить текст
 notebook_tab_replace = Заменить
@@ -205,7 +209,7 @@ renaming_ignored_files = Игнорировать { $ignored } файлов, п�
 renaming_failed_files = Не удалось переименовать { $failed_vector } файлов
 renaming_list_of_failed_to_rename = Список неудачных переименований
 renaming_error = ошибка
-renaming_some_records_not_updated = Некоторые записи не обновляются, вы можете сделать это, нажав на кнопку Update Names.\nВы уверены, что хотите продолжить без обновления имени?
+renaming_some_records_not_updated = Некоторые записи не обновлены; их можно обновить кнопкой «Обновить имена».\nПродолжить без обновления имён?
 renaming_missing_files = Отсутствующие файлы
 renaming_require_missing_files = Вы должны использовать хотя бы 1 файл
 renaming_missing_rules = Пропущенные правила

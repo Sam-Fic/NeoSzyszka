@@ -46,7 +46,7 @@ button_unselect_all = Tout désélectionner
 button_select_changed = Sélectionner les modifications
 button_unselect_changed = Désélectionner Changé
 # Un/Select custom
-select_custom_example = Utilisation: */folder-nr*/* ou name-version-*.txt
+select_custom_example = Utilisation : */dossier-nº*/* ou nom-version-*.txt
 select_custom_path = Chemin d'accès
 select_custom_current_path = Chemin actuel
 select_custom_future_path = Chemin du futur
@@ -56,7 +56,7 @@ select_custom_directory_file = Répertoire/Fichier
 select_custom_select_directory = Sélectionner un répertoire
 select_custom_unselect_directory = Désélectionner le répertoire
 # General
-dialog_button_ok = Ok
+dialog_button_ok = OK
 dialog_button_cancel = Abandonner
 # Dialogs
 dialog_name_files_to_include = Fichiers à inclure
@@ -132,9 +132,9 @@ check_button_replace_replace_all = Remplacer toutes les occurrences
 label_replace_replacing_strings = Remplacement des chaînes :
 label_replace_text_to_find = Texte à trouver
 label_replace_text_to_replace = Texte remplacé
-label_replace_captures = Captures
+label_replace_captures = Groupes capturés
 label_replace_captured_captures = Captures capturées
-label_replace_captures_number = ({ $capture_number } captures)
+label_replace_captures_number = ({ $capture_number } groupes capturés)
 label_replace_no_captures = Aucune capture
 label_replace_invalid_regex = REGEX NON VALIDE
 # Trim
@@ -147,20 +147,24 @@ check_button_trim_case_insensitive = Cas Insensible
 label_trim_trim_text = Couper le texte
 label_trim_case_sensitivity = Sensibilité à la casse
 # Normalize name
-label_normalize_name = Everything - only `a-z 0-9 - . space`. Partial - also allows `A-Z` and spaces.
+label_normalize_name = Tout – renomme le nom afin qu’il ne contienne que les caractères `a-z`, `0-9`, `-`, l’espace et `.`.
+                       Exemple : `żółć CZERona.Txt` → `zolc-czerwona.txt`
+
+                       Partiel – fonctionne comme l’option ci-dessus, mais autorise les espaces et les majuscules `A-Z`.
+                       Exemple : ` Źrebię Krokietowe.Rar ` → `Zrebie Krokietowe.Rar`
 check_button_normalize_everything = Tout
 check_button_normalize_partial = Partiellement
 # RuleType
 rule_type_custom = Personnalisé
 rule_type_case_size = Taille du boîtier
-rule_type_purge = Purge
+rule_type_purge = Purger
 rule_type_add_text = Ajouter un texte
 rule_type_trim = Ajuster
 rule_type_replace = Remplacer
 rule_type_add_number = Ajouter un numéro
 rule_type_normalize = Normaliser
 # RulePlace
-rule_place_none = N/A
+rule_place_none = Sans objet
 rule_place_extension = Extension uniquement
 rule_place_name = Seulement le nom
 rule_place_extension_name = Extension et nom
@@ -191,7 +195,7 @@ rule_description_replace = Remplacement de { $additional_regex_text } "{ $text_t
 # Notebooks
 notebook_tab_custom = Personnalisé
 notebook_tab_case_size = Cas majuscules/minuscules
-notebook_tab_purge = Purge
+notebook_tab_purge = Purger
 notebook_tab_add_number = Ajouter un numéro
 notebook_tab_add_text = Ajouter un texte
 notebook_tab_replace = Remplacer

@@ -59,7 +59,7 @@ button_select_changed = 选择已更改的
 button_unselect_changed = 取消已更改的
 
 # Un/Select custom
-select_custom_example = 用法：*/folder*/* 或 name-version-*.txt
+select_custom_example = 用法：*/文件夹*/* 或 名称-版本-*.txt
 select_custom_path = 路径
 select_custom_current_path = 当前名称
 select_custom_future_path = 新名称
@@ -263,7 +263,7 @@ dialog_copy_all_errors = 复制所有错误
 dialog_select = 选择
 dialog_select_body = 选择操作
 dialog_select_custom_title = 自定义选择
-dialog_select_custom_body = 用法：*/folder*/* 或 name-version-*.txt
+dialog_select_custom_body = 用法：*/文件夹*/* 或 名称-版本-*.txt
 dialog_select_custom_pattern = 模式
 dialog_select_custom_include_dirs = 包含目录
 dialog_select_custom_match = 匹配：
