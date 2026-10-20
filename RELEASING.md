@@ -1,10 +1,10 @@
 # NeoSzyszka 发布指南（Release Guide）
 
-> 涵盖版本发布流程（AI 走前几步 + `release.yml` CI 自动构建三平台并发布）以及 Flatpak 构建专项细节。
+> 涵盖版本发布流程（AI 走前几步 + `release.yml` CI 自动构建全平台产物并发布）以及 Flatpak / Debian 构建专项细节。
 
 > 本文档供 AI 编程助手在协助构建和发布版本时参考。
 >
-> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成。推送 `v*` tag 后，CI 将并行构建并上传以下产物：Linux `szyszka-X.Y.Z.flatpak`、Windows `szyszka-X.Y.Z-windows-x86_64.zip`、Intel macOS `szyszka-X.Y.Z-macos-x86_64.dmg` 与 Apple Silicon macOS `szyszka-X.Y.Z-macos-aarch64.dmg`。Windows ZIP 含 GTK/libadwaita 运行时，macOS DMG 含 `.app` 与所需动态库；后者为临时签名，尚未经过 Apple Developer ID 签名或公证。
+> **发布模型（重要）**：本项目的实际发布由 `.github/workflows/release.yml` 全自动完成。推送 `v*` tag 后，CI 将并行构建并上传以下产物：Linux Flatpak `szyszka-X.Y.Z.flatpak`、Linux Debian 包 `szyszka-X.Y.Z-linux-x86_64.deb`、Windows `szyszka-X.Y.Z-windows-x86_64.zip`、Intel macOS `szyszka-X.Y.Z-macos-x86_64.dmg` 与 Apple Silicon macOS `szyszka-X.Y.Z-macos-aarch64.dmg`。Windows ZIP 含 GTK/libadwaita 运行时，macOS DMG 含 `.app` 与所需动态库（临时签名，尚未经过 Apple Developer ID 签名或公证）；Debian 包直接使用系统 GTK 4 / libadwaita 运行库，依赖由构建机自动推导。
 >
 > 从 Actions 页面手动运行 `Release packages` 时，CI 会生成带 `snapshot-<commit>` 版本号的相同平台产物作为工作流 artifact，但**不会**创建 GitHub Release。此模式适合在打 tag 前验证打包流程。
 >
@@ -32,7 +32,7 @@ flatpak install --user flathub org.freedesktop.Sdk.Extension.rust-stable//24.08
 
 ## 二、版本发布完整流程
 
-> **AI 执行说明**：以下所有步骤应由 AI 自动完成，无需用户手动操作。AI 应按顺序执行：查看 git 历史 → 更新版本号 → 更新 metainfo → commit → tag → push。推送 `v*` tag 后，三平台构建与 GitHub Release 创建由 `release.yml` CI 自动完成，AI **不**应在本地执行 flatpak 构建或手动 `gh release create`。
+> **AI 执行说明**：以下所有步骤应由 AI 自动完成，无需用户手动操作。AI 应按顺序执行：查看 git 历史 → 更新版本号 → 更新 metainfo → commit → tag → push。推送 `v*` tag 后，全平台构建与 GitHub Release 创建由 `release.yml` CI 自动完成，AI **不**应在本地执行 flatpak 构建或手动 `gh release create`。
 
 ### 2.1 版本发布提交规范
 
@@ -93,7 +93,7 @@ git log v4.0.0..HEAD --stat --name-only
 
 ### 2.4 提交、打标签与推送
 
-> **推送即发布**：推 `v*` tag 后，`release.yml` 会自动构建三平台产物并创建 GitHub Release。所以这一步之后 AI 无需再做构建或发布操作，只需等待 CI 完成并验证结果。
+> **推送即发布**：推 `v*` tag 后，`release.yml` 会自动构建全平台产物并创建 GitHub Release。所以这一步之后 AI 无需再做构建或发布操作，只需等待 CI 完成并验证结果。
 
 AI 应直接执行以下命令，无需询问用户：
 
@@ -196,6 +196,8 @@ data/
   com.github.samfic.szyszka.desktop       ← 桌面入口文件
   icons/com.github.samfic.szyszka.svg     ← 应用图标
 ```
+
+> Debian 包没有仓库内清单文件：`release.yml` 的 `debian` job 在 CI 中直接装配包目录并用 `dpkg-deb` 打包，约定见 8.4。
 
 ### 构建清单结构
 
@@ -342,9 +344,9 @@ rm -rf build-dir/ flatpak-repo/ .flatpak-builder/ vendor/
 # 4. cargo check          # 刷新 Cargo.lock
 # 5. git add Cargo.toml Cargo.lock data/com.github.samfic.szyszka.metainfo.xml
 #    && git commit -m "release: vX.Y.Z" && git tag vX.Y.Z && git push && git push origin vX.Y.Z
-#    → 推送 v* tag 即触发 release.yml：自动三平台构建 + 创建 GitHub Release 上传全部安装包
-# 6. 等待 CI 完成，用 gh run list --workflow release.yml 跟踪，确认三个产物
-#    （.flatpak / Windows ZIP / Intel 与 Apple Silicon macOS DMG）均已出现在 GitHub Release
+#    → 推送 v* tag 即触发 release.yml：自动全平台构建 + 创建 GitHub Release 上传全部安装包
+# 6. 等待 CI 完成，用 gh run list --workflow release.yml 跟踪，确认全部产物
+#    （Linux .flatpak 与 .deb / Windows ZIP / Intel 与 Apple Silicon macOS DMG）均已出现在 GitHub Release
 ```
 
 > 💡 第 2 步是重点：自动生成的 commit 列表只是**草稿**，AI 必须二次润色成符合上式的流畅双语日志，再写入 metainfo。release.yml 会从该条目提取 notes，因此 metainfo 里的日志即最终对外发布文案。
@@ -362,7 +364,7 @@ rm -rf vendor/
 
 ## 七、发布到 GitHub Releases（由 CI 自动完成）
 
-> **不要手动创建 Release**：`.github/workflows/release.yml` 的 `release` job 会在 `v*` tag 推送后，自动下载三平台 artifact、从 `metainfo.xml` 提取对应版本 notes、创建（唯一的）GitHub Release 并上传全部安装包。手动 `gh release create` 会与 CI 重复，导致两个 Release 或上传冲突。
+> **不要手动创建 Release**：`.github/workflows/release.yml` 的 `release` job 会在 `v*` tag 推送后，自动下载全部平台 artifact、从 `metainfo.xml` 提取对应版本 notes、创建（唯一的）GitHub Release 并上传全部安装包。手动 `gh release create` 会与 CI 重复，导致两个 Release 或上传冲突。
 
 ### 7.1 推送 tag 前的自检（CI 前置条件）
 
@@ -380,7 +382,7 @@ rm -rf vendor/
 # 查看 release.yml 运行状态（等待所有 job 成功）
 gh run list --workflow release.yml --limit 3
 
-# CI 完成后，确认 Release 与三平台产物
+# CI 完成后，确认 Release 与全部平台产物
 gh release view vX.Y.Z
 gh release download vX.Y.Z -D /tmp/szyszka-release && ls -lh /tmp/szyszka-release
 ```
@@ -397,7 +399,7 @@ gh release download vX.Y.Z -D /tmp/szyszka-release && ls -lh /tmp/szyszka-releas
 
 项目配置了 `.github/workflows/release.yml`，当推送 `v*` 标签时自动完成跨平台构建与发布：
 
-1. 并行构建 3 个产物：Flatpak bundle（Linux 平台专用）、Windows 二进制、macOS 二进制
+1. 并行构建 4 个产物：Linux 的 Flatpak bundle 与 Debian 包、Windows 二进制、macOS 二进制（Intel 与 Apple Silicon）
 2. 从 `metainfo.xml` 提取对应版本的更新说明
 3. 创建（唯一的）GitHub Release，将全部产物一并上传
 
@@ -416,7 +418,7 @@ git push origin v4.1.0
 
 1. 推送 `v*` 标签后，CI 自动 checkout 仓库（清单的 `path: ..` 即指向仓库根）
 2. Flatpak job 自动运行 `cargo vendor` 生成 vendored 依赖，并用 `type: dir` 源码构建 bundle
-3. Windows / macOS job 各自安装对应 GTK 依赖（MSYS2 / `brew`）后 `cargo build --release`；Linux 平台不产出独立原生二进制，仅由 Flatpak job 提供安装包
+3. Windows / macOS / Debian job 各自安装对应 GTK 依赖（MSYS2 / `brew` / `apt`）后 `cargo build --release`；其中 Debian job 额外用 `dpkg-deb` 打包，是 Linux 平台上唯一的独立原生二进制产物
 4. 统一的 `release` job 下载全部 artifact，从 `metainfo.xml` 提取 notes，一次性创建 GitHub Release 并上传所有产物
 
 ### 8.3 本地模拟 CI 构建
@@ -438,3 +440,19 @@ rm -rf vendor/
 ```
 
 > 说明：CI 容器内 checkout 后清单的 `path: ..` 指向仓库根，与本地执行时目录结构相同，所以本地命令和 CI 命令一致。
+
+### 8.4 Debian 包（`debian` job）
+
+Debian 包没有仓库内清单，完全由 `release.yml` 的 `debian` job 在 `ubuntu-24.04` runner 上生成，步骤与 Windows / macOS job 同构（装依赖 → `cargo build --release` → 装配 → 打包）：
+
+1. `apt` 安装 `libgtk-4-dev`、`libadwaita-1-dev`、`libglib2.0-dev-bin`，`rustup default 1.96.1`；
+2. 按与 Flatpak 相同的安装布局装配包目录：`/usr/bin/szyszka`、`/usr/share/applications` 下的 desktop 文件、`/usr/share/metainfo` 下的 AppStream 元数据、`/usr/share/icons/hicolor` 下的 SVG 与 1024px PNG 图标；
+3. `DEBIAN/control`、`copyright`、`changelog.Debian.gz`、`md5sums` 全部在 CI 中就地生成（`copyright` 由仓库 `LICENSE` 转成 DEP-5 格式），因此版本号始终跟随 tag / snapshot，无需在仓库里维护静态模板；
+4. `dpkg-deb --build --root-owner-group -Zxz` 产出 `szyszka-X.Y.Z-linux-x86_64.deb`，job 内还会 `dpkg -i` 安装一次做自检。
+
+需要记住的约定：
+
+- **版本映射**：release 用 `X.Y.Z`；snapshot 用 `0~snapshot-<commit>`（Debian 版本号必须以数字开头，`0~` 保证排在所有正式版本之前）；
+- **依赖推导**：`Depends` 由 `ldd` + `dpkg -S` 从二进制实际链接的库推导，GTK 4.12 / libadwaita 1.5 用版本下限显式钉住（对应 crate 的 `v4_12` / `v1_5` feature），过旧的发行版会被 dpkg 拒绝安装；
+- **目标发行版**：包在 `ubuntu-24.04` 上构建，`Depends` 使用该发行版的实际包名（如 `libglib2.0-0t64`），因此面向 Ubuntu 24.04+ / Debian 13+；
+- **本地复刻**：在任意 `ubuntu-24.04` 环境执行 job 内的同一套 `install` + `dpkg-deb` 命令即可，job 脚本即权威实现。
