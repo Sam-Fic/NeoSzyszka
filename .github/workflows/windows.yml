@@ -20,14 +20,14 @@ jobs:
       - name: Install GTK dependencies and Rust (MSYS2)
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-rust
-            mingw-w64-x86_64-gtk4
-            mingw-w64-x86_64-libadwaita
-            mingw-w64-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-rust
+            mingw-w64-ucrt-x86_64-gtk4
+            mingw-w64-ucrt-x86_64-libadwaita
+            mingw-w64-ucrt-x86_64-pkgconf
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}

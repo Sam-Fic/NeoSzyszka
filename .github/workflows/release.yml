@@ -92,16 +92,16 @@ jobs:
       - name: Install GTK, libadwaita, Rust and packaging tools
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-rust
-            mingw-w64-x86_64-gtk4
-            mingw-w64-x86_64-libadwaita
-            mingw-w64-x86_64-adwaita-icon-theme
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-ntldd
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-rust
+            mingw-w64-ucrt-x86_64-gtk4
+            mingw-w64-ucrt-x86_64-libadwaita
+            mingw-w64-ucrt-x86_64-adwaita-icon-theme
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-ntldd
       - name: Build and assemble portable package
         shell: msys2 {0}
         env:
@@ -120,7 +120,7 @@ jobs:
 
           # ntldd recursively discovers every non-system DLL used by the executable.
           ntldd -R "$APP_BIN/NeoSzyszka.exe" \
-            | sed -nE 's|.*(/mingw64/bin/[^[:space:]]+\.dll).*|\1|p' \
+            | sed -nE "s|.*(${MINGW_PREFIX}/bin/[^[:space:]]+\.dll).*|\1|p" \
             | sort -u \
             | while IFS= read -r dll; do
                 cp -n "$dll" "$APP_BIN/"
@@ -147,7 +147,7 @@ jobs:
           find "$APP_ROOT/lib" -type f -name '*.dll' -print0 2>/dev/null \
             | while IFS= read -r -d '' module; do
                 ntldd -R "$module" \
-                  | sed -nE 's|.*(/mingw64/bin/[^[:space:]]+\.dll).*|\1|p' \
+                  | sed -nE "s|.*(${MINGW_PREFIX}/bin/[^[:space:]]+\.dll).*|\1|p" \
                   | sort -u \
                   | while IFS= read -r dll; do
                       cp -n "$dll" "$APP_BIN/"
