@@ -172,6 +172,19 @@ jobs:
           cp data/icons/com.github.samfic.szyszka.png "$APP_ROOT/share/icons/hicolor/1024x1024/apps/com.github.samfic.szyszka.png"
           gtk4-update-icon-cache -f -t "$APP_ROOT/share/icons/hicolor"
 
+          # A package without the GTK runtime cannot start, so fail the job here
+          # instead of silently shipping a ZIP whose bin/ holds only the exe.
+          echo "Bundled files in bin/:"
+          ls -1 "$APP_BIN"
+          missing=0
+          for prefix in libgtk-4- libadwaita-1- libglib-2.0-; do
+            if ! ls "$APP_BIN/${prefix}"*.dll >/dev/null 2>&1; then
+              echo "::error::no ${prefix}*.dll was bundled into the Windows package"
+              missing=1
+            fi
+          done
+          test "$missing" -eq 0
+
           cat > "$APP_ROOT/NeoSzyszka.cmd" <<'CMD'
           @echo off
           setlocal
