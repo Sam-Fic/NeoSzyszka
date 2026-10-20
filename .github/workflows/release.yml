@@ -82,6 +82,164 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+  debian:
+    name: Debian package (linux-x86_64)
+    needs: metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install GTK, libadwaita and Rust
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-4-dev libadwaita-1-dev libglib2.0-dev-bin
+          rustup default 1.96.1
+          rustc --version
+          pkg-config --modversion gtk4 libadwaita-1
+      - name: Build and assemble Debian package
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+          IS_RELEASE: ${{ needs.metadata.outputs.is_release }}
+        run: |
+          set -euo pipefail
+
+          cargo build --release
+
+          # Debian versions must start with a digit, so snapshot builds get a
+          # "0~" prefix that still sorts before every real release.
+          if [ "$IS_RELEASE" = "true" ]; then
+            DEB_VERSION="$VERSION"
+          else
+            DEB_VERSION="0~$VERSION"
+          fi
+
+          STAGE="$PWD/dist/deb"
+          PKG_ROOT="$STAGE/szyszka"
+          rm -rf "$STAGE"
+          mkdir -p \
+            "$PKG_ROOT/DEBIAN" \
+            "$PKG_ROOT/usr/bin" \
+            "$PKG_ROOT/usr/share/applications" \
+            "$PKG_ROOT/usr/share/metainfo" \
+            "$PKG_ROOT/usr/share/doc/szyszka" \
+            "$PKG_ROOT/usr/share/icons/hicolor/scalable/apps" \
+            "$PKG_ROOT/usr/share/icons/hicolor/1024x1024/apps"
+
+          # Same install layout as the Flatpak module, plus the raster icon and the
+          # documentation the Windows and macOS packages also carry.
+          install -Dm755 target/release/szyszka "$PKG_ROOT/usr/bin/szyszka"
+          install -Dm644 data/com.github.samfic.szyszka.desktop \
+            "$PKG_ROOT/usr/share/applications/com.github.samfic.szyszka.desktop"
+          install -Dm644 data/com.github.samfic.szyszka.metainfo.xml \
+            "$PKG_ROOT/usr/share/metainfo/com.github.samfic.szyszka.metainfo.xml"
+          install -Dm644 data/icons/com.github.samfic.szyszka.svg \
+            "$PKG_ROOT/usr/share/icons/hicolor/scalable/apps/com.github.samfic.szyszka.svg"
+          install -Dm644 data/icons/com.github.samfic.szyszka.png \
+            "$PKG_ROOT/usr/share/icons/hicolor/1024x1024/apps/com.github.samfic.szyszka.png"
+
+          # Machine-readable copyright generated from the project LICENSE.
+          {
+            printf 'Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\n'
+            printf 'Upstream-Name: szyszka\n'
+            printf 'Source: https://github.com/Sam-Fic/NeoSzyszka\n'
+            printf '\n'
+            printf 'Files: *\n'
+            printf 'Copyright: Rafał Mikrut <mikrutrafal@protonmail.com>\n'
+            printf '           Sam-Fic <samfic@foxmail.com>\n'
+            printf 'License: MIT\n'
+            sed -e 's/^$/./' -e 's/^/ /' LICENSE
+          } > "$PKG_ROOT/usr/share/doc/szyszka/copyright"
+
+          gzip -9n > "$PKG_ROOT/usr/share/doc/szyszka/changelog.Debian.gz" <<EOF
+          szyszka ($DEB_VERSION) unstable; urgency=medium
+
+            * Automated package build from commit $GITHUB_SHA.
+
+           -- Sam-Fic <samfic@foxmail.com>  $(date -R)
+          EOF
+
+          # Derive Depends from the shared libraries the binary actually links
+          # against, so the control file can never drift from what was built.
+          # Paths are canonicalised because dpkg records merged-/usr locations.
+          LIBS=$(ldd target/release/szyszka \
+            | awk '$2 == "=>" { print $3 } $1 ~ /^\// { print $1 }' \
+            | grep '^/' \
+            | while IFS= read -r lib; do readlink -f "$lib"; done \
+            | grep '^/' | sort -u)
+          echo "Linked libraries:"
+          echo "$LIBS"
+          AUTO_DEPS=$(for lib in $LIBS; do dpkg -S "$lib" 2>/dev/null | cut -d: -f1; done \
+            | sort -u | grep -vx -e libgtk-4-1 -e libadwaita-1-0 | paste -sd ',' - | sed 's/,/, /g')
+          test -n "$AUTO_DEPS"
+
+          # GTK 4.12 and libadwaita 1.5 are the floors the crate features require,
+          # so pinning them keeps the package off distributions that are too old.
+          DEPS="$AUTO_DEPS, libgtk-4-1 (>= 4.12), libadwaita-1-0 (>= 1.5)"
+          echo "Depends: $DEPS"
+
+          INSTALLED_SIZE=$(du -sk --exclude=DEBIAN "$PKG_ROOT" | cut -f1)
+
+          cat > "$PKG_ROOT/DEBIAN/control" <<EOF
+          Package: szyszka
+          Version: $DEB_VERSION
+          Architecture: amd64
+          Maintainer: Sam-Fic <samfic@foxmail.com>
+          Installed-Size: $INSTALLED_SIZE
+          Section: utils
+          Priority: optional
+          Homepage: https://github.com/Sam-Fic/NeoSzyszka
+          Depends: $DEPS
+          Description: Fast, powerful and easy to use file renamer (GTK 4 / libadwaita)
+           NeoSzyszka is a fork of the original Szyszka file renamer by Rafał Mikrut,
+           rewritten with GTK 4 and libadwaita and maintained by Sam-Fic.
+           .
+           It renames files in bulk using user defined rules: the local file name is
+           matched against a pattern and variables such as the index, original name,
+           extension, date or file size are substituted before the files are renamed.
+          EOF
+
+          ( cd "$PKG_ROOT" && find usr -type f -exec md5sum {} + ) > "$PKG_ROOT/DEBIAN/md5sums"
+
+          DEB_PATH="$PWD/dist/szyszka-${VERSION}-linux-x86_64.deb"
+          dpkg-deb --build --root-owner-group -Zxz "$PKG_ROOT" "$DEB_PATH"
+
+          # A package that lost its GTK or libadwaita dependency renders unusable,
+          # so fail here instead of shipping a broken one.
+          test -x "$PKG_ROOT/usr/bin/szyszka"
+          test -s "$DEB_PATH"
+          for required in libgtk-4-1 libadwaita-1-0; do
+            case "$DEPS" in
+              *"$required"*) ;;
+              *) echo "::error::Depends is missing $required ($DEPS)"; exit 1 ;;
+            esac
+          done
+
+          echo "=== dpkg-deb --field ==="
+          dpkg-deb --field "$DEB_PATH"
+          echo "=== dpkg-deb --contents ==="
+          dpkg-deb --contents "$DEB_PATH"
+
+          # Installing on the build machine proves Depends is complete and the
+          # layout is accepted by dpkg.
+          sudo dpkg -i "$DEB_PATH"
+          dpkg -s szyszka | grep -E '^(Package|Version|Architecture|Depends):'
+          test -x /usr/bin/szyszka
+          test -f /usr/share/applications/com.github.samfic.szyszka.desktop
+          test -f /usr/share/metainfo/com.github.samfic.szyszka.metainfo.xml
+          test -f /usr/share/icons/hicolor/scalable/apps/com.github.samfic.szyszka.svg
+          test -f /usr/share/icons/hicolor/1024x1024/apps/com.github.samfic.szyszka.png
+          sudo dpkg -r szyszka
+
+          ls -lh "$DEB_PATH"
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v6
+        with:
+          name: szyszka-${{ needs.metadata.outputs.version }}-linux-x86_64
+          path: dist/szyszka-${{ needs.metadata.outputs.version }}-linux-x86_64.deb
+          if-no-files-found: error
+          compression-level: 0
+
   windows:
     name: Windows portable package
     needs: metadata
@@ -349,7 +507,7 @@ jobs:
 
   release:
     name: Publish GitHub release
-    needs: [metadata, flatpak, windows, macos]
+    needs: [metadata, flatpak, debian, windows, macos]
     if: needs.metadata.outputs.is_release == 'true'
     runs-on: ubuntu-24.04
     steps:
