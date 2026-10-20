@@ -118,13 +118,22 @@ jobs:
           cp LICENSE "$APP_ROOT/LICENSE.txt"
           cp data/icons/com.github.samfic.szyszka.ico "$APP_ROOT/NeoSzyszka.ico"
 
-          # ntldd recursively discovers every non-system DLL used by the executable.
-          ntldd -R "$APP_BIN/NeoSzyszka.exe" \
-            | sed -nE "s|.*(${MINGW_PREFIX}/bin/[^[:space:]]+\.dll).*|\1|p" \
-            | sort -u \
-            | while IFS= read -r dll; do
-                cp -n "$dll" "$APP_BIN/"
-              done
+          # Resolve the native dependency tree with ntldd and copy every DLL that
+          # MSYS2 provides. Only the file name is taken from ntldd output, so the
+          # result does not depend on how it prints paths (POSIX, Windows, or
+          # "not found" entries for system libraries).
+          copy_msys2_dlls() {
+            ntldd -R "$1" \
+              | sed -nE 's|.*[\\/]([^\\/:[:space:]]+\.dll).*|\1|p' \
+              | sort -u \
+              | while IFS= read -r dll; do
+                  if [ -f "$MINGW_PREFIX/bin/$dll" ]; then
+                    cp -n "$MINGW_PREFIX/bin/$dll" "$APP_BIN/"
+                  fi
+                done
+          }
+
+          copy_msys2_dlls "$APP_BIN/NeoSzyszka.exe"
 
           # GTK loads schemas, themes, icons and optional image modules at runtime.
           for directory in \
@@ -143,15 +152,10 @@ jobs:
               fi
             done
 
-          # Runtime modules can themselves depend on DLLs not linked by the executable.
+          # Runtime modules (gdk-pixbuf loaders, GTK/GIO modules) pull in more DLLs.
           find "$APP_ROOT/lib" -type f -name '*.dll' -print0 2>/dev/null \
             | while IFS= read -r -d '' module; do
-                ntldd -R "$module" \
-                  | sed -nE "s|.*(${MINGW_PREFIX}/bin/[^[:space:]]+\.dll).*|\1|p" \
-                  | sort -u \
-                  | while IFS= read -r dll; do
-                      cp -n "$dll" "$APP_BIN/"
-                    done
+                copy_msys2_dlls "$module"
               done
 
           glib-compile-schemas "$APP_ROOT/share/glib-2.0/schemas"
